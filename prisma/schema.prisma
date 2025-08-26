@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Location {
+  id      String @id @default(cuid())
+  name    String
+  address String
+  lat     Float
+  lng     Float
+  cars    Car[]
+}
+
+model Car {
+  id           String    @id @default(cuid())
+  make         String
+  model        String
+  year         Int
+  licensePlate String    @unique
+  category     String
+  dailyRate    Float
+  kmRate       Float
+  capacity     Int
+  locationId   String
+  isActive     Boolean   @default(true)
+  features     Json?
+  location     Location  @relation(fields: [locationId], references: [id])
+  bookings     Booking[]
+  drivers      Driver[]
+
+  @@index([locationId, isActive])
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  fullName  String
+  phone     String
+  email     String    @unique
+  password  String
+  idDocUrl  String?
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+}
+
+model Driver {
+  id            String    @id @default(cuid())
+  name          String
+  phone         String
+  licenseNumber String    @unique
+  active        Boolean   @default(true)
+  currentCarId  String?
+  skills        Json?
+  currentCar    Car?      @relation(fields: [currentCarId], references: [id])
+  bookings      Booking[]
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  carId        String
+  customerId   String
+  driverId     String?
+  startTime    DateTime
+  endTime      DateTime
+  pricingMode  String
+  estimatedKm  Float?
+  totalPrice   Float
+  driverPrice  Float?        @default(0)
+  withDriver   Boolean       @default(false)
+  status       BookingStatus @default(PENDING)
+  addons       Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  car          Car           @relation(fields: [carId], references: [id])
+  customer     Customer      @relation(fields: [customerId], references: [id])
+  driver       Driver?       @relation(fields: [driverId], references: [id])
+
+  @@index([carId, startTime, endTime])
+  @@index([status, startTime])
+}
+
+model AddOn {
+  id        String    @id @default(cuid())
+  name      String
+  priceType PriceType
+  price     Float
+}
+
+model Settings {
+  id          String @id @default(cuid())
+  key         String @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum PriceType {
+  FLAT
+  PER_KM
+  PER_PERSON
+}

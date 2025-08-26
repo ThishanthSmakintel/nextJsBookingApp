@@ -1,0 +1,127 @@
+@import 'driver.js/dist/driver.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: system-ui, sans-serif;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .stat {
+    @apply p-6;
+  }
+  
+  .countdown {
+    @apply text-center;
+  }
+  
+  .countdown span {
+    @apply inline-block w-8 h-8 leading-8 bg-neutral text-neutral-content rounded;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:scale-105 hover:shadow-2xl;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+  
+  /* Fix form input visibility */
+  input[type="datetime-local"],
+  select,
+  option {
+    @apply text-base-content;
+    color-scheme: light dark;
+  }
+  
+  input[type="datetime-local"]::-webkit-datetime-edit,
+  select option {
+    @apply text-base-content bg-base-100;
+  }
+  
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    @apply text-base-content opacity-70;
+    filter: invert(var(--tw-invert, 0));
+  }
+  
+  select {
+    @apply bg-base-100 text-base-content;
+  }
+  
+  select option {
+    @apply bg-base-100 text-base-content;
+  }
+  
+  [data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    --tw-invert: 1;
+  }
+  
+  [data-theme="dark"] select,
+  [data-theme="dark"] select option {
+    @apply bg-base-100 text-base-content;
+  }
+}
+
+/* Enhanced Driver.js Styles */
+.driver-popover {
+  @apply !bg-base-100 !text-base-content !border-2 !border-primary !rounded-2xl !shadow-2xl;
+  backdrop-filter: blur(10px);
+}
+
+.driver-popover .driver-popover-title {
+  @apply !text-2xl !font-bold !text-primary !mb-3;
+}
+
+.driver-popover .driver-popover-description {
+  @apply !text-base !text-base-content/80 !leading-relaxed !mb-4;
+}
+
+.driver-popover .driver-popover-footer {
+  @apply !flex !justify-between !items-center !pt-4 !border-t !border-gray-200;
+}
+
+.driver-popover .driver-popover-progress-text {
+  @apply !text-sm !text-gray-500 !font-medium;
+}
+
+.driver-popover .driver-popover-next-btn {
+  @apply !bg-primary !text-white !px-6 !py-2 !rounded-lg !font-semibold !transition-all !duration-200;
+}
+
+.driver-popover .driver-popover-next-btn:hover {
+  @apply !bg-blue-600 !transform !scale-105;
+}
+
+.driver-popover .driver-popover-prev-btn {
+  @apply !bg-transparent !text-primary !border-2 !border-primary !px-6 !py-2 !rounded-lg !font-semibold !transition-all !duration-200;
+}
+
+.driver-popover .driver-popover-prev-btn:hover {
+  @apply !bg-primary !text-white !transform !scale-105;
+}
+
+.driver-popover .driver-popover-close-btn {
+  @apply !absolute !top-4 !right-4 !w-8 !h-8 !bg-base-200 !text-base-content/60 !rounded-full !flex !items-center !justify-center !transition-all !duration-200;
+}
+
+.driver-popover .driver-popover-close-btn:hover {
+  @apply !bg-error/20 !text-error !transform !scale-110;
+}
+
+.driver-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(2px) !important;
+}
+
+.driver-highlighted-element {
+  @apply !rounded-xl;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), 0 0 0 8px rgba(59, 130, 246, 0.2) !important;
+}

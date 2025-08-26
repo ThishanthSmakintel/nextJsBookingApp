@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 CarBook System - Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; padding: 40px 0; text-align: center; margin-bottom: 30px; border-radius: 20px; }
+        .section { background: white; margin: 20px 0; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        h2 { color: #3b82f6; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; margin-bottom: 20px; }
+        h3 { color: #8b5cf6; margin: 20px 0 10px 0; }
+        .architecture-diagram { background: #f8f9fa; padding: 25px; border-radius: 12px; font-family: 'Courier New', monospace; white-space: pre-line; overflow-x: auto; border-left: 5px solid #3b82f6; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .card { background: #f8f9fa; padding: 25px; border-radius: 12px; border-left: 5px solid #3b82f6; }
+        .workflow-step { background: #e3f2fd; padding: 20px; margin: 15px 0; border-radius: 10px; border-left: 5px solid #2196f3; position: relative; }
+        .workflow-step::before { content: attr(data-step); position: absolute; left: -15px; top: -10px; background: #2196f3; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .endpoint { background: #e8f5e8; padding: 12px; margin: 8px 0; border-radius: 8px; font-family: 'Courier New', monospace; border-left: 4px solid #4caf50; }
+        .command { background: #263238; color: #4caf50; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; margin: 15px 0; }
+        .command::before { content: "$ "; color: #81c784; }
+        .feature-list { list-style: none; }
+        .feature-list li { padding: 10px 0; border-bottom: 1px solid #eee; position: relative; padding-left: 30px; }
+        .feature-list li:before { content: "✅ "; position: absolute; left: 0; color: #4caf50; font-weight: bold; }
+        .tech-badge { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; padding: 8px 16px; border-radius: 25px; font-size: 0.9em; font-weight: 500; margin: 5px; display: inline-block; }
+        .new-feature { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>🚗 CarBook System</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">Modern Car Booking Platform with Email Authentication & Dark/Light Mode</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- System Overview -->
+        <div class="section">
+            <h2>🏗️ System Architecture</h2>
+            <div class="architecture-diagram">┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend API   │    │   Database      │
+│   Next.js 14    │◄──►│   Node.js       │◄──►│   PostgreSQL    │
+│   DaisyUI       │    │   Socket.IO     │    │   Prisma ORM    │
+│   Driver.js     │    │   Email Auth    │    │   Redis Cache   │
+│   Lucide Icons  │    │   OTP System    │    │   Dark/Light    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │              ┌─────────────────┐              │
+         └──────────────►│     Redis       │◄─────────────┘
+                        │   Car Locking   │
+                        │   Pub/Sub       │
+                        │   Caching       │
+                        └─────────────────┘
+                                 │
+                        ┌─────────────────┐
+                        │   Workers       │
+                        │ • Email Service │
+                        │ • Notifications │
+                        │ • Driver Assign │
+                        │ • Admin Updates │
+                        │ • Analytics     │
+                        │ • Cleanup       │
+                        └─────────────────┘</div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="section">
+            <h2>🛠️ Technology Stack</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Frontend</h3>
+                    <div class="tech-badge">Next.js 14</div>
+                    <div class="tech-badge">React 18</div>
+                    <div class="tech-badge">TailwindCSS</div>
+                    <div class="tech-badge">DaisyUI</div>
+                    <div class="tech-badge">Driver.js</div>
+                    <div class="tech-badge new-feature">Lucide Icons</div>
+                    <div class="tech-badge">Zustand</div>
+                </div>
+                <div class="card">
+                    <h3>Backend</h3>
+                    <div class="tech-badge">Node.js</div>
+                    <div class="tech-badge">Socket.IO</div>
+                    <div class="tech-badge">JWT</div>
+                    <div class="tech-badge new-feature">Nodemailer</div>
+                    <div class="tech-badge new-feature">Email OTP</div>
+                    <div class="tech-badge">CASL</div>
+                </div>
+                <div class="card">
+                    <h3>Database</h3>
+                    <div class="tech-badge">PostgreSQL</div>
+                    <div class="tech-badge">Prisma ORM</div>
+                    <div class="tech-badge">Redis</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Features -->
+        <div class="section">
+            <h2>✨ Key Features</h2>
+            <ul class="feature-list">
+                <li>Passwordless email-based authentication</li>
+                <li>Real-time car booking with 10-minute reservations</li>
+                <li>Event-driven architecture with Redis pub/sub</li>
+                <li>Automatic driver assignment</li>
+                <li>Role-based access control (Customer, Driver, Admin)</li>
+                <li>Modern UI with DaisyUI components</li>
+                <li>Interactive onboarding with Driver.js</li>
+                <li>Dark/Light mode theme switching</li>
+                <li>Lucide React icons throughout</li>
+                <li>Real-time notifications via Socket.IO</li>
+                <li>Responsive design for all devices</li>
+                <li>OTP verification via email</li>
+            </ul>
+        </div>
+
+        <!-- UI/UX Features -->
+        <div class="section">
+            <h2>🎨 UI/UX Features</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Authentication System</h3>
+                    <ul class="feature-list">
+                        <li>Passwordless email authentication</li>
+                        <li>6-digit OTP verification</li>
+                        <li>Auto-registration for new users</li>
+                        <li>Secure JWT token management</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Theme System</h3>
+                    <ul class="feature-list">
+                        <li>Automatic dark/light mode detection</li>
+                        <li>Theme persistence in localStorage</li>
+                        <li>Smooth theme transitions</li>
+                        <li>Theme-aware component colors</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Interactive Elements</h3>
+                    <ul class="feature-list">
+                        <li>Enhanced Driver.js onboarding tours</li>
+                        <li>Lucide icons for consistency</li>
+                        <li>Hover effects and animations</li>
+                        <li>Loading states and feedback</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Accessibility</h3>
+                    <ul class="feature-list">
+                        <li>High contrast ratios</li>
+                        <li>Keyboard navigation support</li>
+                        <li>Screen reader compatibility</li>
+                        <li>Focus indicators</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Flow -->
+        <div class="section">
+            <h2>🎯 User Journey</h2>
+            <div class="workflow-step" data-step="1">
+                <h4>Email Authentication</h4>
+                <p>Enter email address and verify with OTP code sent to your inbox</p>
+            </div>
+            <div class="workflow-step" data-step="2">
+                <h4>Search Cars</h4>
+                <p>Browse available cars by location, date, and category with modern filters</p>
+            </div>
+            <div class="workflow-step" data-step="3">
+                <h4>Lock Car</h4>
+                <p>Reserve car for 10 minutes with animated countdown timer</p>
+            </div>
+            <div class="workflow-step" data-step="4">
+                <h4>Complete Booking</h4>
+                <p>Fill booking details with guided tour and theme-aware interface</p>
+            </div>
+            <div class="workflow-step" data-step="5">
+                <h4>Driver Assignment</h4>
+                <p>System automatically assigns available driver with real-time updates</p>
+            </div>
+            <div class="workflow-step" data-step="6">
+                <h4>Real-time Updates</h4>
+                <p>Receive notifications and track booking status in preferred theme</p>
+            </div>
+        </div>
+
+        <!-- API Endpoints -->
+        <div class="section">
+            <h2>🔌 API Endpoints</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Authentication</h3>
+                    <div class="endpoint">POST /api/auth/check-email</div>
+                    <div class="endpoint">POST /api/auth/verify-email</div>
+                    <div class="endpoint">POST /api/auth/logout</div>
+                </div>
+                <div class="card">
+                    <h3>Cars & Booking</h3>
+                    <div class="endpoint">GET /api/cars</div>
+                    <div class="endpoint">POST /api/bookings/precheck</div>
+                    <div class="endpoint">POST /api/bookings/confirm</div>
+                    <div class="endpoint">GET /api/user/bookings</div>
+                </div>
+                <div class="card">
+                    <h3>Admin</h3>
+                    <div class="endpoint">GET /api/admin/stats</div>
+                    <div class="endpoint">GET /api/admin/bookings</div>
+                    <div class="endpoint">GET /api/admin/cars</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="section">
+            <h2>🚀 Quick Setup</h2>
+            <h3>1. Install Dependencies</h3>
+            <div class="command">npm install</div>
+            
+            <h3>2. Environment Setup</h3>
+            <div class="command">cp .env.example .env</div>
+            <p style="margin: 10px 0; color: #666;">Configure SMTP settings for email authentication:</p>
+            <div class="command">SMTP_HOST=smtp.gmail.com</div>
+            <div class="command">SMTP_USER=your-email@gmail.com</div>
+            <div class="command">SMTP_PASS=your-app-password</div>
+            
+            <h3>3. Database Setup</h3>
+            <div class="command">npm run db:generate</div>
+            <div class="command">npm run db:push</div>
+            <div class="command">npm run db:seed</div>
+            
+            <h3>4. Start Development</h3>
+            <div class="command">npm run dev</div>
+            <div class="command">npm run workers:all</div>
+        </div>
+
+        <!-- Pages -->
+        <div class="section">
+            <h2>📱 Application Pages</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Public Pages</h3>
+                    <ul class="feature-list">
+                        <li>/ - Homepage with theme toggle</li>
+                        <li>/search - Car listings with email auth modal</li>
+                        <li>/login - Email authentication (deprecated)</li>
+                        <li>/register - Auto-registration via email</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>User Pages</h3>
+                    <ul class="feature-list">
+                        <li>/dashboard - User dashboard with stats</li>
+                        <li>/book - Booking form with countdown</li>
+                        <li>/bookings - Booking history</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Authentication -->
+        <div class="section">
+            <h2>📧 Email Authentication System</h2>
+            <h3>How It Works</h3>
+            <ul class="feature-list">
+                <li>User enters email address</li>
+                <li>System sends 6-digit OTP code</li>
+                <li>User verifies OTP to authenticate</li>
+                <li>New users are automatically registered</li>
+                <li>JWT token issued for session management</li>
+            </ul>
+            
+            <h3>SMTP Configuration</h3>
+            <div class="command">Gmail SMTP: smtp.gmail.com:587</div>
+            <div class="command">Email: dev15.smakintel@gmail.com</div>
+            <div class="command">App Password: lkvzbnjczftffxvi</div>
+        </div>
+
+        <!-- Theme Configuration -->
+        <div class="section">
+            <h2>🌙 Theme Configuration</h2>
+            <h3>Light Theme Colors</h3>
+            <div class="command">primary: #3b82f6, secondary: #8b5cf6, base-100: #ffffff</div>
+            
+            <h3>Dark Theme Colors</h3>
+            <div class="command">primary: #60a5fa, secondary: #a78bfa, base-100: #111827</div>
+            
+            <h3>Theme Toggle Usage</h3>
+            <div class="command">Click sun/moon icon in navbar to switch themes</div>
+        </div>
+
+        <!-- Deployment -->
+        <div class="section">
+            <h2>🌐 Production Deployment</h2>
+            <h3>VPS Setup</h3>
+            <div class="command">git clone &lt;repository&gt;</div>
+            <div class="command">npm install</div>
+            <div class="command">npm run build</div>
+            <div class="command">pm2 start ecosystem.config.js</div>
+            
+            <h3>Required Services</h3>
+            <ul class="feature-list">
+                <li>Node.js 18+</li>
+                <li>PostgreSQL 14+</li>
+                <li>Redis 6+</li>
+                <li>Nginx (reverse proxy)</li>
+                <li>PM2 (process manager)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

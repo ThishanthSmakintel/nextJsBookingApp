@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  phone     String?
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  bookings     Booking[] @relation("CustomerBookings")
+  staffBookings Booking[] @relation("StaffBookings")
+
+  @@map("users")
+}
+
+model Car {
+  id           String   @id @default(cuid())
+  make         String
+  model        String
+  year         Int
+  licensePlate String   @unique
+  category     CarCategory
+  dailyRate    Decimal
+  kmRate       Decimal
+  capacity     Int
+  locationId   String
+  features     Json?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  location Location @relation(fields: [locationId], references: [id])
+  bookings Booking[]
+
+  @@map("cars")
+}
+
+model Location {
+  id      String  @id @default(cuid())
+  name    String
+  address String
+  lat     Decimal
+  lng     Decimal
+
+  // Relations
+  cars Car[]
+
+  @@map("locations")
+}
+
+model Booking {
+  id         String        @id @default(cuid())
+  carId      String
+  customerId String
+  staffId    String?
+  startTime  DateTime
+  endTime    DateTime
+  totalPrice Decimal
+  status     BookingStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  // Relations
+  car      Car  @relation(fields: [carId], references: [id])
+  customer User @relation("CustomerBookings", fields: [customerId], references: [id])
+  staff    User? @relation("StaffBookings", fields: [staffId], references: [id])
+
+  @@map("bookings")
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("otps")
+}
+
+enum UserRole {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+
+enum CarCategory {
+  economy
+  compact
+  sedan
+  suv
+  luxury
+  van
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}

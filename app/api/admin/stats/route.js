@@ -14,18 +14,22 @@ export async function GET(request) {
     
     const today = new Date().toISOString().split('T')[0]
     
-    const [totalBookings, totalCars, totalCustomers, todayBookings] = await Promise.all([
+    const [totalBookings, totalCars, totalCustomers, activeBookings, availableCars, totalDrivers] = await Promise.all([
       prisma.booking.count(),
       prisma.car.count(),
       prisma.customer.count(),
-      redis.get(`analytics:booking.created:${today}`) || 0
+      prisma.booking.count({ where: { status: 'CONFIRMED' } }),
+      prisma.car.count({ where: { isActive: true } }),
+      prisma.driver.count()
     ])
     
     return NextResponse.json({
       totalBookings,
+      activeBookings,
       totalCars,
+      availableCars,
       totalCustomers,
-      todayBookings: parseInt(todayBookings)
+      totalDrivers
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })

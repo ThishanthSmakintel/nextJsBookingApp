@@ -21,10 +21,13 @@ export async function POST(request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
     
+    // Determine role based on email (admin@carbook.com is admin)
+    const role = email === 'admin@carbook.com' ? 'admin' : 'customer'
+    
     const token = createToken({ 
       id: customer.id, 
       email: customer.email, 
-      role: 'customer' 
+      role 
     })
     
     return NextResponse.json({ 
@@ -32,7 +35,8 @@ export async function POST(request) {
       user: { 
         id: customer.id, 
         fullName: customer.fullName, 
-        email: customer.email 
+        email: customer.email,
+        role 
       } 
     })
   } catch (error) {

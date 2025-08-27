@@ -1,14 +1,18 @@
 'use client'
 import './globals.css'
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { driver } from 'driver.js'
 import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
 import { AuthProvider } from '@/contexts/AuthContext'
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname()
+  const isAdminRoute = pathname?.startsWith('/admin')
+
   useEffect(() => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('tour-completed')) {
+    if (typeof window !== 'undefined' && !localStorage.getItem('tour-completed') && !isAdminRoute) {
       const driverObj = driver({
         showProgress: true,
         showButtons: ['next', 'previous', 'close'],
@@ -49,7 +53,7 @@ export default function RootLayout({ children }) {
       })
       setTimeout(() => driverObj.drive(), 1500)
     }
-  }, [])
+  }, [isAdminRoute])
 
   return (
     <html lang="en">
@@ -59,17 +63,21 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen">
         <AuthProvider>
-          <div className="drawer">
-            <input id="drawer-toggle" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content flex flex-col">
-              <Header />
-              <main className="flex-1 bg-base-200">{children}</main>
+          {isAdminRoute ? (
+            children
+          ) : (
+            <div className="drawer">
+              <input id="drawer-toggle" type="checkbox" className="drawer-toggle" />
+              <div className="drawer-content flex flex-col">
+                <Header />
+                <main className="flex-1 bg-base-200">{children}</main>
+              </div>
+              <div className="drawer-side">
+                <label htmlFor="drawer-toggle" className="drawer-overlay"></label>
+                <Sidebar />
+              </div>
             </div>
-            <div className="drawer-side">
-              <label htmlFor="drawer-toggle" className="drawer-overlay"></label>
-              <Sidebar />
-            </div>
-          </div>
+          )}
         </AuthProvider>
       </body>
     </html>

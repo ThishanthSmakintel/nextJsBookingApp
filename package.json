@@ -17,6 +17,7 @@
     "db:setup": "node scripts/setup-db.js && npm run db:generate && npm run db:push && node scripts/seed-db.js",
     "db:seed": "node scripts/seed-db.js",
     "db:reset": "node scripts/reset-db.js",
+    "admin:create": "node scripts/create-admin.js",
     "workers:all": "concurrently \"npm run worker:notifications\" \"npm run worker:driver\" \"npm run worker:admin\" \"npm run worker:analytics\" \"npm run worker:cleanup\""
   },
   "dependencies": {

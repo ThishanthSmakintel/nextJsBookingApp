@@ -7,6 +7,11 @@ export async function POST(request) {
   try {
     const { email, password } = await request.json()
     
+    // Only allow admin email
+    if (email !== 'admin@carbook.com') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
+    
     const customer = await prisma.customer.findUnique({
       where: { email }
     })
@@ -15,13 +20,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
     
-    // Determine role based on email (admin@carbook.com is admin)
-    const role = email === 'admin@carbook.com' ? 'admin' : 'customer'
-    
     const token = createToken({ 
       id: customer.id, 
       email: customer.email, 
-      role 
+      role: 'admin' 
     })
     
     return NextResponse.json({ 
@@ -30,7 +32,7 @@ export async function POST(request) {
         id: customer.id, 
         fullName: customer.fullName, 
         email: customer.email,
-        role 
+        role: 'admin'
       } 
     })
   } catch (error) {

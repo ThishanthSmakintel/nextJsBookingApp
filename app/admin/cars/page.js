@@ -14,9 +14,14 @@ export default function CarsPage() {
 
   const fetchCars = async () => {
     try {
-      const response = await fetch('/api/admin/cars');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/cars', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
-      setCars(data.cars || []);
+      setCars(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching cars:', error);
     } finally {

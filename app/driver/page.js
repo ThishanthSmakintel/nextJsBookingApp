@@ -71,6 +71,7 @@ export default function DriverDashboard() {
             </label>
             <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
               <li><a>Profile</a></li>
+              <li><a href="/driver/schedule">My Schedule</a></li>
               <li><a onClick={logout}>Logout</a></li>
             </ul>
           </div>

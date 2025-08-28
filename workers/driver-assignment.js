@@ -4,10 +4,22 @@ import { prisma } from '../lib/db.js'
 import { emitToRoom } from '../lib/socket.js'
 
 const assignDriver = async (booking) => {
+  const bookingStart = new Date(booking.startTime)
+  const dayOfWeek = bookingStart.getDay()
+  const timeStr = bookingStart.toTimeString().slice(0, 5) // HH:MM format
+  
   const availableDrivers = await prisma.driver.findMany({
     where: {
       active: true,
       currentCarId: booking.carId,
+      schedules: {
+        some: {
+          dayOfWeek,
+          isActive: true,
+          startTime: { lte: timeStr },
+          endTime: { gte: timeStr }
+        }
+      },
       bookings: {
         none: {
           startTime: { lte: booking.endTime },
@@ -15,7 +27,8 @@ const assignDriver = async (booking) => {
           status: { in: ['PENDING', 'CONFIRMED'] }
         }
       }
-    }
+    },
+    include: { schedules: true }
   })
 
   if (availableDrivers.length > 0) {

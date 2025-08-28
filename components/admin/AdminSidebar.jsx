@@ -1,27 +1,30 @@
 'use client'
-import { useRouter, usePathname } from 'next/navigation'
+import { memo } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { 
   BarChart3, Calendar, Car, Users, UserCheck, MapPin, 
-  DollarSign, TrendingUp, Settings 
+  DollarSign, TrendingUp, Settings, Clock 
 } from 'lucide-react'
 
-export default function AdminSidebar() {
-  const router = useRouter()
-  const pathname = usePathname()
+const menuItems = [
+  { path: '/admin/dashboard', icon: BarChart3, label: 'Dashboard' },
+  { path: '/admin/create-booking', icon: Calendar, label: 'Create Booking' },
+  { path: '/admin/bookings', icon: Calendar, label: 'Bookings' },
+  { path: '/admin/cars', icon: Car, label: 'Cars' },
+  { path: '/admin/customers', icon: Users, label: 'Customers' },
+  { path: '/admin/drivers', icon: UserCheck, label: 'Drivers' },
+  { path: '/admin/drivers/schedule', icon: Clock, label: 'Driver Schedules' },
+  { path: '/admin/staff', icon: Users, label: 'Staff' },
+  { path: '/admin/locations', icon: MapPin, label: 'Locations' },
+  { path: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
+  { path: '/admin/reports', icon: TrendingUp, label: 'Reports' },
+  { path: '/admin/rbac', icon: UserCheck, label: 'RBAC' },
+  { path: '/admin/settings', icon: Settings, label: 'Settings' }
+]
 
-  const menuItems = [
-    { path: '/admin', icon: BarChart3, label: 'Dashboard' },
-    { path: '/admin/bookings', icon: Calendar, label: 'Bookings' },
-    { path: '/admin/cars', icon: Car, label: 'Cars' },
-    { path: '/admin/customers', icon: Users, label: 'Customers' },
-    { path: '/admin/drivers', icon: UserCheck, label: 'Drivers' },
-    { path: '/admin/staff', icon: Users, label: 'Staff' },
-    { path: '/admin/locations', icon: MapPin, label: 'Locations' },
-    { path: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
-    { path: '/admin/reports', icon: TrendingUp, label: 'Reports' },
-    { path: '/admin/rbac', icon: UserCheck, label: 'RBAC' },
-    { path: '/admin/settings', icon: Settings, label: 'Settings' }
-  ]
+function AdminSidebar() {
+  const pathname = usePathname()
 
   return (
     <div className="w-64 bg-base-100 min-h-screen p-4">
@@ -30,12 +33,12 @@ export default function AdminSidebar() {
           const Icon = item.icon
           return (
             <li key={item.path}>
-              <a 
-                className={pathname === item.path ? 'active' : ''} 
-                onClick={() => router.push(item.path)}
+              <Link 
+                href={item.path}
+                className={pathname === item.path ? 'active' : ''}
               >
                 <Icon size={16} /> {item.label}
-              </a>
+              </Link>
             </li>
           )
         })}
@@ -43,3 +46,5 @@ export default function AdminSidebar() {
     </div>
   )
 }
+
+export default memo(AdminSidebar)

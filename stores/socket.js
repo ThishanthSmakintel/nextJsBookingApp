@@ -6,7 +6,8 @@ export const useSocketStore = create((set, get) => ({
   connected: false,
   
   connect: (token) => {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000'
+    const socket = io(socketUrl, {
       auth: { token }
     })
     

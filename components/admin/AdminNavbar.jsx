@@ -8,7 +8,14 @@ export default function AdminNavbar() {
   const router = useRouter()
   const [notifications, setNotifications] = useState([])
   const [currency, setCurrency] = useState('USD')
-  const { connected } = useSocketStore()
+  const { connected, connect } = useSocketStore()
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      connect(token)
+    }
+  }, [connect])
 
   const currencies = {
     USD: { symbol: '$', name: 'US Dollar' },

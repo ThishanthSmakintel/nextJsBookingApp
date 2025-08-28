@@ -139,8 +139,9 @@ export default function EmailAuthModal({ isOpen, onClose, onSuccess }) {
               <button type="button" className="btn" onClick={onClose}>
                 Cancel
               </button>
-              <button type="submit" className={`btn btn-primary ${loading ? 'loading' : ''}`}>
-                Send OTP
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading && <span className="loading loading-spinner loading-sm"></span>}
+                {loading ? 'Sending...' : 'Send OTP'}
               </button>
             </div>
           </form>
@@ -215,8 +216,9 @@ export default function EmailAuthModal({ isOpen, onClose, onSuccess }) {
               <button type="button" className="btn" onClick={() => setStep('email')}>
                 Back
               </button>
-              <button type="submit" className={`btn btn-primary ${loading ? 'loading' : ''}`}>
-                Verify & Continue
+              <button type="submit" className="btn btn-primary" disabled={loading}>
+                {loading && <span className="loading loading-spinner loading-sm"></span>}
+                {loading ? 'Verifying...' : 'Verify & Continue'}
               </button>
             </div>
           </form>

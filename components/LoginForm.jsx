@@ -153,8 +153,10 @@ export default function LoginForm() {
             <button 
               id="login-btn"
               type="submit" 
-              className={`btn btn-primary w-full ${loading ? 'loading' : ''}`}
+              className="btn btn-primary w-full"
+              disabled={loading}
             >
+              {loading && <span className="loading loading-spinner loading-sm"></span>}
               {loading ? 'Sending OTP...' : 'Login with OTP'}
             </button>
           </form>
@@ -192,8 +194,10 @@ export default function LoginForm() {
               </button>
               <button 
                 type="submit" 
-                className={`btn btn-primary flex-1 ${loading ? 'loading' : ''}`}
+                className="btn btn-primary flex-1"
+                disabled={loading}
               >
+                {loading && <span className="loading loading-spinner loading-sm"></span>}
                 {loading ? 'Verifying...' : 'Login'}
               </button>
             </div>

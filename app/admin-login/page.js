@@ -25,6 +25,7 @@ export default function AdminLogin() {
 
       if (response.ok) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
         router.push('/admin')
       } else {
         setError(data.error)
@@ -80,9 +81,10 @@ export default function AdminLogin() {
             <div className="form-control mt-6">
               <button 
                 type="submit" 
-                className={`btn btn-primary ${loading ? 'loading' : ''}`}
+                className="btn btn-primary"
                 disabled={loading}
               >
+                {loading && <span className="loading loading-spinner loading-sm"></span>}
                 {loading ? 'Logging in...' : 'Login'}
               </button>
             </div>

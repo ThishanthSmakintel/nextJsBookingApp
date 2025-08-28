@@ -7,6 +7,28 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [currency, setCurrency] = useState('USD')
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchBookings()
+  }, [])
+
+  const fetchBookings = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/admin/bookings', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      setBookings(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Error fetching bookings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const currencies = {
     USD: { symbol: '$', name: 'US Dollar' },

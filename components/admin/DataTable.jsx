@@ -38,7 +38,7 @@ export default function DataTable({ title, data, columns, searchTerm, onSearch, 
                 <tr key={idx}>
                   {columns.map(col => (
                     <td key={col.key}>
-                      {col.render ? col.render(row) : row[col.key]}
+                      {col.render ? col.render(row[col.key], row) : row[col.key]}
                     </td>
                   ))}
                 </tr>

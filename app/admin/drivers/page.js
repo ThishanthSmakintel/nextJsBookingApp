@@ -14,9 +14,14 @@ export default function DriversPage() {
 
   const fetchDrivers = async () => {
     try {
-      const response = await fetch('/api/admin/drivers');
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/admin/drivers', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
-      setDrivers(data.drivers || []);
+      setDrivers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error fetching drivers:', error);
     } finally {

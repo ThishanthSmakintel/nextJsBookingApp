@@ -1,20 +1,30 @@
 import { NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
 
-export async function GET(request) {
+let cars = [
+  {
+    id: '1',
+    make: 'Toyota',
+    model: 'Camry',
+    year: 2023,
+    licensePlate: 'ABC-123',
+    category: 'Sedan',
+    dailyRate: 50,
+    isActive: true
+  },
+  {
+    id: '2',
+    make: 'Honda',
+    model: 'CR-V',
+    year: 2022,
+    licensePlate: 'XYZ-789',
+    category: 'SUV',
+    dailyRate: 70,
+    isActive: true
+  }
+]
+
+export async function GET() {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-    const user = verifyToken(token)
-    
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
-    
-    const cars = await prisma.car.findMany({
-      include: { location: true }
-    })
-    
     return NextResponse.json(cars)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch cars' }, { status: 500 })
@@ -23,19 +33,15 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-    const user = verifyToken(token)
-    
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
-    
     const carData = await request.json()
     
-    const car = await prisma.car.create({
-      data: carData,
-      include: { location: true }
-    })
+    const car = {
+      id: Date.now().toString(),
+      ...carData,
+      isActive: true
+    }
+    
+    cars.push(car)
     
     return NextResponse.json(car)
   } catch (error) {

@@ -58,6 +58,22 @@ model Driver {
   skills        Json?
   currentCar    Car?      @relation(fields: [currentCarId], references: [id])
   bookings      Booking[]
+  schedules     DriverSchedule[]
+}
+
+model DriverSchedule {
+  id        String   @id @default(cuid())
+  driverId  String
+  dayOfWeek Int      // 0=Sunday, 1=Monday, ..., 6=Saturday
+  startTime String   // HH:MM format
+  endTime   String   // HH:MM format
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  driver    Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@unique([driverId, dayOfWeek])
+  @@index([driverId, isActive])
 }
 
 model Booking {
@@ -91,12 +107,54 @@ model AddOn {
   price     Float
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  phone     String?
+  password  String
+  role      UserRole @default(CUSTOMER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  permissions UserPermission[]
+}
+
+model Permission {
+  id          String @id @default(cuid())
+  resource    String // bookings, cars, customers, drivers, etc
+  action      String // create, read, update, delete
+  description String?
+  users       UserPermission[]
+
+  @@unique([resource, action])
+}
+
+model UserPermission {
+  id           String     @id @default(cuid())
+  userId       String
+  permissionId String
+  granted      Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, permissionId])
+}
+
 model Settings {
   id          String @id @default(cuid())
   key         String @unique
   value       String
   description String?
   updatedAt   DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  STAFF
+  DRIVER
+  CUSTOMER
 }
 
 enum BookingStatus {

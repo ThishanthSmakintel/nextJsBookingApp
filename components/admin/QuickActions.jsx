@@ -1,29 +1,31 @@
+'use client'
+import Link from 'next/link'
 import { Plus, Download, Upload, RefreshCw } from 'lucide-react'
 
-export default function QuickActions({ onAddCar, onAddDriver, onAddStaff, onRefresh, onExport }) {
+export default function QuickActions() {
   return (
     <div className="card bg-base-100 shadow">
       <div className="card-body">
         <h3 className="card-title">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-2">
-          <button className="btn btn-primary btn-sm" onClick={onAddCar}>
+          <Link href="/admin/cars" className="btn btn-primary btn-sm">
             <Plus size={16} /> Add Car
-          </button>
-          <button className="btn btn-secondary btn-sm" onClick={onAddDriver}>
+          </Link>
+          <Link href="/admin/drivers" className="btn btn-secondary btn-sm">
             <Plus size={16} /> Add Driver
-          </button>
-          <button className="btn btn-accent btn-sm" onClick={onAddStaff}>
+          </Link>
+          <Link href="/admin/staff" className="btn btn-accent btn-sm">
             <Plus size={16} /> Add Staff
-          </button>
-          <button className="btn btn-ghost btn-sm" onClick={onRefresh}>
-            <RefreshCw size={16} /> Refresh
-          </button>
-          <button className="btn btn-outline btn-sm" onClick={onExport}>
-            <Download size={16} /> Export
-          </button>
-          <button className="btn btn-outline btn-sm">
-            <Upload size={16} /> Import
-          </button>
+          </Link>
+          <Link href="/admin/bookings" className="btn btn-info btn-sm">
+            <Plus size={16} /> New Booking
+          </Link>
+          <Link href="/admin/customers" className="btn btn-warning btn-sm">
+            <Plus size={16} /> Add Customer
+          </Link>
+          <Link href="/admin/reports" className="btn btn-outline btn-sm">
+            <Download size={16} /> Reports
+          </Link>
         </div>
       </div>
     </div>

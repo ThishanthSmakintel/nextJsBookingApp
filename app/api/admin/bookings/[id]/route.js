@@ -1,29 +1,26 @@
 import { NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { PrismaClient } from '@prisma/client'
 
-export async function PATCH(request, { params }) {
+const prisma = new PrismaClient()
+
+export async function DELETE(request, { params }) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-    const user = verifyToken(token)
-    
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-    }
-    
-    const { status } = await request.json()
-    const { id } = params
-    
-    const booking = await prisma.booking.update({
-      where: { id },
-      data: { status },
-      include: {
-        car: { include: { location: true } },
-        customer: true,
-        driver: true
-      }
+    await prisma.booking.delete({
+      where: { id: params.id }
     })
-    
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 })
+  }
+}
+
+export async function PUT(request, { params }) {
+  try {
+    const body = await request.json()
+    const booking = await prisma.booking.update({
+      where: { id: params.id },
+      data: body
+    })
     return NextResponse.json(booking)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 })

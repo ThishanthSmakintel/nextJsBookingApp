@@ -3,18 +3,52 @@
 import { useState, useEffect } from 'react';
 import DataTable from '@/components/admin/DataTable';
 import CanAccess from '@/components/CanAccess';
+import { useToast, useConfirm } from '@/components/Toast';
 import { UserCheck, UserPlus, Edit, Trash2, Calendar } from 'lucide-react';
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingDriver, setEditingDriver] = useState(null);
   const [newDriver, setNewDriver] = useState({
     name: '',
     phone: '',
     licenseNumber: '',
     active: true
   });
+  const [deleting, setDeleting] = useState(null);
+  const toast = useToast();
+  const confirm = useConfirm();
+
+  const handleEditDriver = (driver) => {
+    setEditingDriver(driver);
+    setNewDriver(driver);
+    setShowAddModal(true);
+  };
+
+  const handleDeleteDriver = async (driverId) => {
+    confirm('Delete this driver?', async () => {
+      setDeleting(driverId)
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/admin/drivers/${driverId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          toast.success('Driver deleted successfully')
+          fetchDrivers()
+        } else {
+          toast.error('Failed to delete driver')
+        }
+      } catch (error) {
+        toast.error('Error deleting driver')
+      } finally {
+        setDeleting(null)
+      }
+    })
+  };
 
   useEffect(() => {
     fetchDrivers();
@@ -39,10 +73,25 @@ export default function DriversPage() {
 
   const handleAddDriver = async (e) => {
     e.preventDefault();
+    
+    if (!newDriver.name.trim()) {
+      toast.error('Name is required')
+      return
+    }
+    if (!newDriver.phone.trim()) {
+      toast.error('Phone is required')
+      return
+    }
+    if (!newDriver.licenseNumber.trim()) {
+      toast.error('License number is required')
+      return
+    }
+    
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/admin/drivers', {
-        method: 'POST',
+      const url = editingDriver ? `/api/admin/drivers/${editingDriver.id}` : '/api/admin/drivers';
+      const response = await fetch(url, {
+        method: editingDriver ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -51,12 +100,16 @@ export default function DriversPage() {
       });
       
       if (response.ok) {
+        toast.success(editingDriver ? 'Driver updated successfully' : 'Driver added successfully')
         setShowAddModal(false);
+        setEditingDriver(null);
         setNewDriver({ name: '', phone: '', licenseNumber: '', active: true });
         fetchDrivers();
+      } else {
+        toast.error('Failed to save driver')
       }
     } catch (error) {
-      console.error('Error adding driver:', error);
+      toast.error('Error saving driver')
     }
   };
 
@@ -81,13 +134,21 @@ export default function DriversPage() {
             Schedule
           </button>
           <CanAccess action="update" subject="Driver" fallback={null}>
-            <button className="btn btn-sm btn-ghost">
+            <button className="btn btn-sm btn-ghost" onClick={() => handleEditDriver(driver)}>
               <Edit className="w-4 h-4" />
             </button>
           </CanAccess>
           <CanAccess action="delete" subject="Driver" fallback={null}>
-            <button className="btn btn-sm btn-ghost text-error">
-              <Trash2 className="w-4 h-4" />
+            <button 
+              className="btn btn-sm btn-ghost text-error" 
+              onClick={() => handleDeleteDriver(driver.id)}
+              disabled={deleting === driver.id}
+            >
+              {deleting === driver.id ? (
+                <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <Trash2 className="w-4 h-4" />
+              )}
             </button>
           </CanAccess>
         </div>
@@ -97,8 +158,14 @@ export default function DriversPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full border-4 border-primary/20"></div>
+            <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin absolute top-0"></div>
+          </div>
+          <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -132,7 +199,7 @@ export default function DriversPage() {
       {showAddModal && (
         <div className="modal modal-open">
           <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">Add New Driver</h3>
+            <h3 className="font-bold text-lg mb-4">{editingDriver ? 'Edit Driver' : 'Add New Driver'}</h3>
             <form onSubmit={handleAddDriver} className="space-y-4">
               <div className="form-control">
                 <label className="label">
@@ -143,7 +210,6 @@ export default function DriversPage() {
                   className="input input-bordered"
                   value={newDriver.name}
                   onChange={(e) => setNewDriver({...newDriver, name: e.target.value})}
-                  required
                 />
               </div>
               <div className="form-control">
@@ -155,7 +221,6 @@ export default function DriversPage() {
                   className="input input-bordered"
                   value={newDriver.phone}
                   onChange={(e) => setNewDriver({...newDriver, phone: e.target.value})}
-                  required
                 />
               </div>
               <div className="form-control">
@@ -167,7 +232,6 @@ export default function DriversPage() {
                   className="input input-bordered"
                   value={newDriver.licenseNumber}
                   onChange={(e) => setNewDriver({...newDriver, licenseNumber: e.target.value})}
-                  required
                 />
               </div>
               <div className="modal-action">
@@ -175,7 +239,7 @@ export default function DriversPage() {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Add Driver
+                  {editingDriver ? 'Update' : 'Add'} Driver
                 </button>
               </div>
             </form>

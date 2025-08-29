@@ -7,6 +7,21 @@ import { BarChart3, Download, Calendar, TrendingUp, Users, Car, DollarSign } fro
 export default function ReportsPage() {
   const [reportData, setReportData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [dateRange, setDateRange] = useState('7');
+
+  const handleExport = async () => {
+    try {
+      const response = await fetch(`/api/admin/reports/export?range=${dateRange}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `report-${dateRange}days.csv`;
+      a.click();
+    } catch (error) {
+      console.error('Error exporting report:', error);
+    }
+  };
 
   useEffect(() => {
     fetchReportData();
@@ -26,8 +41,14 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full border-4 border-primary/20"></div>
+            <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin absolute top-0"></div>
+          </div>
+          <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -43,13 +64,13 @@ export default function ReportsPage() {
           <p className="text-base-content/70 mt-1">View business insights and performance metrics</p>
         </div>
         <div className="flex gap-2">
-          <select className="select select-bordered">
-            <option>Last 7 days</option>
-            <option>Last 30 days</option>
-            <option>Last 3 months</option>
-            <option>Last year</option>
+          <select className="select select-bordered" value={dateRange} onChange={(e) => setDateRange(e.target.value)}>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 3 months</option>
+            <option value="365">Last year</option>
           </select>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={handleExport}>
             <Download className="w-4 h-4" />
             Export
           </button>
@@ -59,30 +80,30 @@ export default function ReportsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           title="Total Revenue"
-          value="$45,230"
-          change="+12.5%"
-          trend="up"
+          value={reportData.totalRevenue || "$0"}
+          change={reportData.revenueChange || "0%"}
+          trend={reportData.revenueTrend || "neutral"}
           icon={DollarSign}
         />
         <StatsCard
           title="Total Bookings"
-          value="1,234"
-          change="+8.2%"
-          trend="up"
+          value={reportData.totalBookings || "0"}
+          change={reportData.bookingsChange || "0%"}
+          trend={reportData.bookingsTrend || "neutral"}
           icon={Calendar}
         />
         <StatsCard
           title="Active Users"
-          value="892"
-          change="+15.3%"
-          trend="up"
+          value={reportData.activeUsers || "0"}
+          change={reportData.usersChange || "0%"}
+          trend={reportData.usersTrend || "neutral"}
           icon={Users}
         />
         <StatsCard
           title="Fleet Utilization"
-          value="78%"
-          change="+5.1%"
-          trend="up"
+          value={reportData.fleetUtilization || "0%"}
+          change={reportData.utilizationChange || "0%"}
+          trend={reportData.utilizationTrend || "neutral"}
           icon={Car}
         />
       </div>

@@ -3,17 +3,21 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-model Location {
-  id      String @id @default(cuid())
-  name    String
-  address String
-  lat     Float
-  lng     Float
-  cars    Car[]
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  phone        String?
+  role         String    @default("CUSTOMER")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  bookings     Booking[]
+  permissions  UserPermission[]
 }
 
 model Car {
@@ -22,30 +26,40 @@ model Car {
   model        String
   year         Int
   licensePlate String    @unique
-  category     String
-  dailyRate    Float
-  kmRate       Float
-  capacity     Int
-  locationId   String
+  pricePerHour Float
+  currency     String    @default("USD")
+  status       String    @default("available")
+  image        String?
   isActive     Boolean   @default(true)
-  features     Json?
-  location     Location  @relation(fields: [locationId], references: [id])
+  createdAt    DateTime  @default(now())
   bookings     Booking[]
-  drivers      Driver[]
-
-  @@index([locationId, isActive])
 }
 
-model Customer {
-  id        String    @id @default(cuid())
-  userId    String    @unique
-  fullName  String
-  phone     String
-  email     String    @unique
-  password  String
-  idDocUrl  String?
-  createdAt DateTime  @default(now())
-  bookings  Booking[]
+model Location {
+  id            String  @id @default(cuid())
+  name          String
+  address       String
+  city          String
+  availableCars Int     @default(0)
+  status        String  @default("active")
+  createdAt     DateTime @default(now())
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  customerId String
+  carId      String
+  driverId   String?
+  startTime  DateTime
+  endTime    DateTime
+  status     String   @default("PENDING")
+  totalPrice Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  customer   User     @relation(fields: [customerId], references: [id])
+  car        Car      @relation(fields: [carId], references: [id])
+  driver     Driver?  @relation(fields: [driverId], references: [id])
 }
 
 model Driver {
@@ -54,79 +68,17 @@ model Driver {
   phone         String
   licenseNumber String    @unique
   active        Boolean   @default(true)
-  currentCarId  String?
-  skills        Json?
-  currentCar    Car?      @relation(fields: [currentCarId], references: [id])
+  createdAt     DateTime  @default(now())
   bookings      Booking[]
-  schedules     DriverSchedule[]
-}
-
-model DriverSchedule {
-  id        String   @id @default(cuid())
-  driverId  String
-  dayOfWeek Int      // 0=Sunday, 1=Monday, ..., 6=Saturday
-  startTime String   // HH:MM format
-  endTime   String   // HH:MM format
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  driver    Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
-
-  @@unique([driverId, dayOfWeek])
-  @@index([driverId, isActive])
-}
-
-model Booking {
-  id           String        @id @default(cuid())
-  carId        String
-  customerId   String
-  driverId     String?
-  startTime    DateTime
-  endTime      DateTime
-  pricingMode  String
-  estimatedKm  Float?
-  totalPrice   Float
-  driverPrice  Float?        @default(0)
-  withDriver   Boolean       @default(false)
-  status       BookingStatus @default(PENDING)
-  addons       Json?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  car          Car           @relation(fields: [carId], references: [id])
-  customer     Customer      @relation(fields: [customerId], references: [id])
-  driver       Driver?       @relation(fields: [driverId], references: [id])
-
-  @@index([carId, startTime, endTime])
-  @@index([status, startTime])
-}
-
-model AddOn {
-  id        String    @id @default(cuid())
-  name      String
-  priceType PriceType
-  price     Float
-}
-
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  phone     String?
-  password  String
-  role      UserRole @default(CUSTOMER)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  permissions UserPermission[]
 }
 
 model Permission {
-  id          String @id @default(cuid())
-  resource    String // bookings, cars, customers, drivers, etc
-  action      String // create, read, update, delete
+  id          String           @id @default(cuid())
+  resource    String
+  action      String
   description String?
   users       UserPermission[]
-
+  
   @@unique([resource, action])
 }
 
@@ -136,36 +88,19 @@ model UserPermission {
   permissionId String
   granted      Boolean    @default(true)
   createdAt    DateTime   @default(now())
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
+  
+  user         User       @relation(fields: [userId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  
   @@unique([userId, permissionId])
 }
 
-model Settings {
-  id          String @id @default(cuid())
-  key         String @unique
-  value       String
-  description String?
-  updatedAt   DateTime @updatedAt
-}
-
-enum UserRole {
-  ADMIN
-  STAFF
-  DRIVER
-  CUSTOMER
-}
-
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  CANCELLED
-  COMPLETED
-}
-
-enum PriceType {
-  FLAT
-  PER_KM
-  PER_PERSON
+model PricingRule {
+  id           String  @id @default(cuid())
+  category     String
+  dailyRate    Float
+  kmRate       Float?
+  currency     String  @default("USD")
+  weekendRate  Float?
+  createdAt    DateTime @default(now())
 }

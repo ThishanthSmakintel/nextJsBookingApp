@@ -131,8 +131,14 @@ export default function CustomersPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full border-4 border-primary/20"></div>
+            <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin absolute top-0"></div>
+          </div>
+          <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
+        </div>
       </div>
     );
   }
@@ -143,9 +149,14 @@ export default function CustomersPage() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Users className="w-8 h-8" />
-            Customers
+            Customers Management
           </h1>
+          <p className="text-base-content/70 mt-1">Manage customer accounts and information</p>
         </div>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <UserPlus className="w-4 h-4" />
+          Add Customer
+        </button>
       </div>
 
       <DataTable

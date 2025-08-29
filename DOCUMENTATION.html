@@ -3,328 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚗 CarBook System - Documentation</title>
+    <title>CarBook - User Documentation</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .header { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white; padding: 40px 0; text-align: center; margin-bottom: 30px; border-radius: 20px; }
-        .section { background: white; margin: 20px 0; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        h1 { font-size: 3em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        h2 { color: #3b82f6; border-bottom: 3px solid #3b82f6; padding-bottom: 10px; margin-bottom: 20px; }
-        h3 { color: #8b5cf6; margin: 20px 0 10px 0; }
-        .architecture-diagram { background: #f8f9fa; padding: 25px; border-radius: 12px; font-family: 'Courier New', monospace; white-space: pre-line; overflow-x: auto; border-left: 5px solid #3b82f6; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
-        .card { background: #f8f9fa; padding: 25px; border-radius: 12px; border-left: 5px solid #3b82f6; }
-        .workflow-step { background: #e3f2fd; padding: 20px; margin: 15px 0; border-radius: 10px; border-left: 5px solid #2196f3; position: relative; }
-        .workflow-step::before { content: attr(data-step); position: absolute; left: -15px; top: -10px; background: #2196f3; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .endpoint { background: #e8f5e8; padding: 12px; margin: 8px 0; border-radius: 8px; font-family: 'Courier New', monospace; border-left: 4px solid #4caf50; }
-        .command { background: #263238; color: #4caf50; padding: 20px; border-radius: 8px; font-family: 'Courier New', monospace; margin: 15px 0; }
-        .command::before { content: "$ "; color: #81c784; }
-        .feature-list { list-style: none; }
-        .feature-list li { padding: 10px 0; border-bottom: 1px solid #eee; position: relative; padding-left: 30px; }
-        .feature-list li:before { content: "✅ "; position: absolute; left: 0; color: #4caf50; font-weight: bold; }
-        .tech-badge { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; padding: 8px 16px; border-radius: 25px; font-size: 0.9em; font-weight: 500; margin: 5px; display: inline-block; }
-        .new-feature { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background: #f4f4f4; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
+        h2 { color: #1e40af; margin-top: 30px; }
+        h3 { color: #1d4ed8; }
+        .role-section { background: #f8fafc; padding: 20px; margin: 20px 0; border-left: 4px solid #2563eb; border-radius: 5px; }
+        .feature { background: #e0f2fe; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .step { background: #f0f9ff; padding: 10px; margin: 5px 0; border-radius: 3px; }
+        code { background: #e5e7eb; padding: 2px 5px; border-radius: 3px; }
+        .warning { background: #fef3c7; border: 1px solid #f59e0b; padding: 10px; border-radius: 5px; margin: 10px 0; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="container">
-            <h1>🚗 CarBook System</h1>
-            <p style="font-size: 1.2em; margin-top: 10px;">Modern Car Booking Platform with Multi-language Support & Theme Toggle</p>
-        </div>
-    </div>
-
     <div class="container">
-        <!-- System Overview -->
-        <div class="section">
-            <h2>🏗️ System Architecture</h2>
-            <div class="architecture-diagram">┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Backend API   │    │   Database      │
-│   Next.js 14    │◄──►│   Node.js       │◄──►│   PostgreSQL    │
-│   DaisyUI       │    │   Socket.IO     │    │   Prisma ORM    │
-│   Driver.js     │    │   Email Auth    │    │   Redis Cache   │
-│   Lucide Icons  │    │   OTP System    │    │   Dark/Light    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │              ┌─────────────────┐              │
-         └──────────────►│     Redis       │◄─────────────┘
-                        │   Car Locking   │
-                        │   Pub/Sub       │
-                        │   Caching       │
-                        └─────────────────┘
-                                 │
-                        ┌─────────────────┐
-                        │   Workers       │
-                        │ • Email Service │
-                        │ • Notifications │
-                        │ • Driver Assign │
-                        │ • Admin Updates │
-                        │ • Analytics     │
-                        │ • Cleanup       │
-                        └─────────────────┘</div>
-        </div>
-
-        <!-- Tech Stack -->
-        <div class="section">
-            <h2>🛠️ Technology Stack</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>Frontend</h3>
-                    <div class="tech-badge">Next.js 14</div>
-                    <div class="tech-badge">React 18</div>
-                    <div class="tech-badge">TailwindCSS</div>
-                    <div class="tech-badge">DaisyUI</div>
-                    <div class="tech-badge">Driver.js</div>
-                    <div class="tech-badge new-feature">Lucide Icons</div>
-                    <div class="tech-badge new-feature">Multi-language (i18n)</div>
-                    <div class="tech-badge">Zustand</div>
-                </div>
-                <div class="card">
-                    <h3>Backend</h3>
-                    <div class="tech-badge">Node.js</div>
-                    <div class="tech-badge">Socket.IO</div>
-                    <div class="tech-badge">JWT</div>
-                    <div class="tech-badge new-feature">Nodemailer</div>
-                    <div class="tech-badge new-feature">Email OTP</div>
-                    <div class="tech-badge">CASL</div>
-                </div>
-                <div class="card">
-                    <h3>Database</h3>
-                    <div class="tech-badge">PostgreSQL</div>
-                    <div class="tech-badge">Prisma ORM</div>
-                    <div class="tech-badge">Redis</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Key Features -->
-        <div class="section">
-            <h2>✨ Key Features</h2>
-            <ul class="feature-list">
-                <li>Passwordless email-based authentication</li>
-                <li>Real-time car booking with 10-minute reservations</li>
-                <li>Event-driven architecture with Redis pub/sub</li>
-                <li>Automatic driver assignment</li>
-                <li>Role-based access control (Customer, Driver, Admin)</li>
-                <li>Modern UI with DaisyUI components</li>
-                <li>Interactive onboarding with Driver.js</li>
-                <li>Dark/Light mode theme switching</li>
-                <li>Multi-language support (English, Spanish, French, Tamil, Sinhala)</li>
-                <li>Lucide React icons throughout</li>
-                <li>Real-time notifications via Socket.IO</li>
-                <li>Responsive design for all devices</li>
-                <li>OTP verification via email</li>
-            </ul>
-        </div>
-
-        <!-- UI/UX Features -->
-        <div class="section">
-            <h2>🎨 UI/UX Features</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>Authentication System</h3>
-                    <ul class="feature-list">
-                        <li>Passwordless email authentication</li>
-                        <li>6-digit OTP verification</li>
-                        <li>Auto-registration for new users</li>
-                        <li>Secure JWT token management</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>Theme & Language System</h3>
-                    <ul class="feature-list">
-                        <li>Dark/Light mode toggle with persistence</li>
-                        <li>5 language support with native scripts</li>
-                        <li>Language persistence in localStorage</li>
-                        <li>Theme-aware component colors</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>Interactive Elements</h3>
-                    <ul class="feature-list">
-                        <li>Enhanced Driver.js onboarding tours</li>
-                        <li>Lucide icons for consistency</li>
-                        <li>Hover effects and animations</li>
-                        <li>Loading states and feedback</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>Accessibility</h3>
-                    <ul class="feature-list">
-                        <li>High contrast ratios</li>
-                        <li>Keyboard navigation support</li>
-                        <li>Screen reader compatibility</li>
-                        <li>Focus indicators</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Flow -->
-        <div class="section">
-            <h2>🎯 User Journey</h2>
-            <div class="workflow-step" data-step="1">
-                <h4>Email Authentication</h4>
-                <p>Enter email address and verify with OTP code sent to your inbox</p>
-            </div>
-            <div class="workflow-step" data-step="2">
-                <h4>Search Cars</h4>
-                <p>Browse available cars by location, date, and category with modern filters</p>
-            </div>
-            <div class="workflow-step" data-step="3">
-                <h4>Lock Car</h4>
-                <p>Reserve car for 10 minutes with animated countdown timer</p>
-            </div>
-            <div class="workflow-step" data-step="4">
-                <h4>Complete Booking</h4>
-                <p>Fill booking details with guided tour and theme-aware interface</p>
-            </div>
-            <div class="workflow-step" data-step="5">
-                <h4>Driver Assignment</h4>
-                <p>System automatically assigns available driver with real-time updates</p>
-            </div>
-            <div class="workflow-step" data-step="6">
-                <h4>Real-time Updates</h4>
-                <p>Receive notifications and track booking status in preferred theme</p>
-            </div>
-        </div>
-
-        <!-- API Endpoints -->
-        <div class="section">
-            <h2>🔌 API Endpoints</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>Authentication</h3>
-                    <div class="endpoint">POST /api/auth/check-email</div>
-                    <div class="endpoint">POST /api/auth/verify-email</div>
-                    <div class="endpoint">POST /api/auth/logout</div>
-                </div>
-                <div class="card">
-                    <h3>Cars & Booking</h3>
-                    <div class="endpoint">GET /api/cars</div>
-                    <div class="endpoint">POST /api/bookings/precheck</div>
-                    <div class="endpoint">POST /api/bookings/confirm</div>
-                    <div class="endpoint">GET /api/user/bookings</div>
-                </div>
-                <div class="card">
-                    <h3>Admin</h3>
-                    <div class="endpoint">GET /api/admin/stats</div>
-                    <div class="endpoint">GET /api/admin/bookings</div>
-                    <div class="endpoint">GET /api/admin/cars</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Setup Instructions -->
-        <div class="section">
-            <h2>🚀 Quick Setup</h2>
-            <h3>1. Install Dependencies</h3>
-            <div class="command">npm install</div>
+        <h1>🚗 CarBook - Complete User Guide</h1>
+        
+        <div class="role-section">
+            <h2>👑 Admin Guide</h2>
             
-            <h3>2. Environment Setup</h3>
-            <div class="command">cp .env.example .env</div>
-            <p style="margin: 10px 0; color: #666;">Configure database and services:</p>
-            <div class="command">DATABASE_URL="postgresql://user:pass@localhost:5432/carbooking"</div>
-            <div class="command">REDIS_URL="redis://localhost:6379"</div>
-            <div class="command">JWT_SECRET="your-secure-jwt-secret"</div>
+            <h3>Dashboard Overview</h3>
+            <div class="feature">
+                <strong>Access:</strong> <code>http://localhost:3000/admin/dashboard</code><br>
+                <strong>Features:</strong> View stats, quick actions, recent activity
+            </div>
             
-            <h3>3. Database Setup</h3>
-            <div class="command">npm run db:generate</div>
-            <div class="command">npm run db:push</div>
-            <div class="command">npm run db:seed</div>
+            <h3>Car Management</h3>
+            <div class="step">1. Navigate to Cars → View all vehicles</div>
+            <div class="step">2. Add Car → Fill form (Make, Model, Year, License, Price, Currency)</div>
+            <div class="step">3. Edit/Delete → Use action buttons</div>
             
-            <h3>4. Start Development</h3>
-            <div class="command">npm run dev</div>
-            <div class="command">npm run workers:all</div>
+            <h3>Customer Management</h3>
+            <div class="step">1. Navigate to Customers → View all customers</div>
+            <div class="step">2. Add Customer → Enter name, email, phone</div>
+            <div class="step">3. Manage → Edit or remove customers</div>
+            
+            <h3>Driver Management</h3>
+            <div class="step">1. Navigate to Drivers → View all drivers</div>
+            <div class="step">2. Add Driver → Enter details and license info</div>
+            <div class="step">3. Assign → Link drivers to bookings</div>
+            
+            <h3>Staff & Permissions</h3>
+            <div class="step">1. Navigate to Management → Staff & Permissions</div>
+            <div class="step">2. Add Staff → Create staff accounts</div>
+            <div class="step">3. Set Permissions → Configure CRUD access per resource</div>
+            
+            <h3>Booking Management</h3>
+            <div class="step">1. Navigate to Bookings → View all reservations</div>
+            <div class="step">2. Create Booking → Manual booking creation</div>
+            <div class="step">3. Manage Status → Confirm, cancel, or modify bookings</div>
+            
+            <h3>Location Management</h3>
+            <div class="step">1. Navigate to Locations → Manage pickup/dropoff points</div>
+            <div class="step">2. Add Location → Enter name, address, city</div>
+            <div class="step">3. Configure → Set available cars per location</div>
+            
+            <h3>Pricing Rules</h3>
+            <div class="step">1. Navigate to Pricing → Set rate structures</div>
+            <div class="step">2. Create Rule → Category, daily rate, KM rate, weekend rate</div>
+            <div class="step">3. Currency → Select from multiple currencies</div>
         </div>
-
-        <!-- Pages -->
-        <div class="section">
-            <h2>📱 Application Pages</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>Public Pages</h3>
-                    <ul class="feature-list">
-                        <li>/ - Homepage with theme & language toggle</li>
-                        <li>/search - Car listings with multilingual UI</li>
-                        <li>/login - User authentication</li>
-                        <li>/register - User registration</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>User Pages</h3>
-                    <ul class="feature-list">
-                        <li>/dashboard - User dashboard with stats</li>
-                        <li>/book - Booking form with countdown</li>
-                        <li>/bookings - Booking history</li>
-                    </ul>
-                </div>
+        
+        <div class="role-section">
+            <h2>👥 Staff Guide</h2>
+            
+            <h3>Limited Admin Access</h3>
+            <div class="feature">
+                <strong>Permissions:</strong> Based on admin-assigned CRUD rights<br>
+                <strong>Access:</strong> Same admin interface with restricted features
+            </div>
+            
+            <h3>Daily Operations</h3>
+            <div class="step">1. Login → Use staff credentials</div>
+            <div class="step">2. Dashboard → View assigned sections only</div>
+            <div class="step">3. Manage → Perform allowed operations (Create/Read/Update/Delete)</div>
+            
+            <div class="warning">
+                <strong>Note:</strong> Staff permissions are controlled by admins. Contact admin if access is needed.
             </div>
         </div>
-
-        <!-- New Features -->
-        <div class="section">
-            <h2>🆕 Latest Features</h2>
-            <div class="grid">
-                <div class="card">
-                    <h3>Multi-language Support</h3>
-                    <ul class="feature-list">
-                        <li>5 languages: EN, ES, FR, TA, SI</li>
-                        <li>Native script support for Tamil/Sinhala</li>
-                        <li>Translation context with useLocale hook</li>
-                        <li>Persistent language preference</li>
-                    </ul>
-                </div>
-                <div class="card">
-                    <h3>Theme System</h3>
-                    <ul class="feature-list">
-                        <li>Dark/Light mode toggle</li>
-                        <li>DaisyUI theme integration</li>
-                        <li>Theme context with useTheme hook</li>
-                        <li>Automatic theme persistence</li>
-                    </ul>
-                </div>
+        
+        <div class="role-section">
+            <h2>🚗 Driver Guide</h2>
+            
+            <h3>Account Setup</h3>
+            <div class="step">1. Admin creates driver account</div>
+            <div class="step">2. Receive login credentials</div>
+            <div class="step">3. Complete profile with license details</div>
+            
+            <h3>Booking Assignment</h3>
+            <div class="step">1. Receive booking notifications</div>
+            <div class="step">2. Accept/decline assignments</div>
+            <div class="step">3. Update booking status during service</div>
+            
+            <h3>Schedule Management</h3>
+            <div class="step">1. View assigned bookings</div>
+            <div class="step">2. Check pickup/dropoff locations</div>
+            <div class="step">3. Update availability status</div>
+        </div>
+        
+        <div class="role-section">
+            <h2>👤 Customer Guide</h2>
+            
+            <h3>Registration & Login</h3>
+            <div class="step">1. Visit <code>http://localhost:3000/register</code></div>
+            <div class="step">2. Fill registration form (name, email, phone)</div>
+            <div class="step">3. Login at <code>http://localhost:3000/login</code></div>
+            
+            <h3>Car Search & Booking</h3>
+            <div class="step">1. Home Page → Use search filters</div>
+            <div class="step">2. Select Location → Choose pickup/dropoff points</div>
+            <div class="step">3. Choose Dates → Set rental period</div>
+            <div class="step">4. Browse Cars → View available vehicles with prices</div>
+            <div class="step">5. Book Now → Reserve selected car</div>
+            
+            <h3>Booking Management</h3>
+            <div class="step">1. Dashboard → View booking history</div>
+            <div class="step">2. Active Bookings → Check current reservations</div>
+            <div class="step">3. Modify/Cancel → Update or cancel bookings</div>
+            
+            <h3>Payment & Confirmation</h3>
+            <div class="step">1. Review Details → Verify booking information</div>
+            <div class="step">2. Payment → Complete transaction</div>
+            <div class="step">3. Confirmation → Receive booking confirmation</div>
+        </div>
+        
+        <div class="role-section">
+            <h2>🔧 System Features</h2>
+            
+            <h3>Multi-Currency Support</h3>
+            <div class="feature">
+                <strong>Currencies:</strong> USD, EUR, GBP, LKR, INR, JPY, CAD, AUD<br>
+                <strong>Usage:</strong> Set per car, automatic conversion in bookings
+            </div>
+            
+            <h3>Real-time Updates</h3>
+            <div class="feature">
+                <strong>Socket.IO:</strong> Live booking updates<br>
+                <strong>Notifications:</strong> Instant alerts for all users
+            </div>
+            
+            <h3>Permission System</h3>
+            <div class="feature">
+                <strong>RBAC:</strong> Role-based access control<br>
+                <strong>Resources:</strong> Cars, Customers, Drivers, Bookings, Staff, Reports
+                <strong>Actions:</strong> Create, Read, Update, Delete per resource
+            </div>
+            
+            <h3>Responsive Design</h3>
+            <div class="feature">
+                <strong>Mobile:</strong> Fully responsive on all devices<br>
+                <strong>Themes:</strong> Light/Dark mode support<br>
+                <strong>Languages:</strong> Multi-language support
             </div>
         </div>
-
-        <!-- Theme & Language Configuration -->
-        <div class="section">
-            <h2>🌙 Theme & Language Configuration</h2>
-            <h3>Theme System</h3>
-            <div class="command">Light: primary #3b82f6, base-100 #ffffff</div>
-            <div class="command">Dark: primary #60a5fa, base-100 #111827</div>
-            <div class="command">Toggle: Sun/Moon icon in navbar</div>
+        
+        <div class="role-section">
+            <h2>🚀 Quick Start</h2>
             
-            <h3>Multi-language Support</h3>
-            <div class="command">English (en), Spanish (es), French (fr)</div>
-            <div class="command">Tamil (ta) - தமிழ், Sinhala (si) - සිංහල</div>
-            <div class="command">Toggle: Globe icon dropdown in navbar</div>
+            <h3>For Admins</h3>
+            <div class="step">1. Login → <code>http://localhost:3000/admin-login</code></div>
+            <div class="step">2. Setup → Add cars, locations, staff</div>
+            <div class="step">3. Configure → Set permissions and pricing</div>
             
-            <h3>Implementation</h3>
-            <div class="command">ThemeContext + LocaleContext providers</div>
-            <div class="command">Translation keys in /lib/i18n.js</div>
-            <div class="command">Persistent storage in localStorage</div>
+            <h3>For Customers</h3>
+            <div class="step">1. Register → Create account</div>
+            <div class="step">2. Search → Find available cars</div>
+            <div class="step">3. Book → Complete reservation</div>
+            
+            <div class="warning">
+                <strong>Default Admin:</strong> Contact system administrator for initial admin credentials
+            </div>
         </div>
-
-        <!-- Deployment -->
-        <div class="section">
-            <h2>🌐 Production Deployment</h2>
-            <h3>VPS Setup</h3>
-            <div class="command">git clone &lt;repository&gt;</div>
-            <div class="command">npm install</div>
-            <div class="command">npm run build</div>
-            <div class="command">pm2 start ecosystem.config.js</div>
-            
-            <h3>Required Services</h3>
-            <ul class="feature-list">
-                <li>Node.js 18+</li>
-                <li>PostgreSQL 14+</li>
-                <li>Redis 6+</li>
-                <li>Nginx (reverse proxy)</li>
-                <li>PM2 (process manager)</li>
-            </ul>
+        
+        <div class="role-section">
+            <h2>📞 Support</h2>
+            <p><strong>Technical Issues:</strong> Contact system administrator</p>
+            <p><strong>Booking Help:</strong> Use in-app support or call customer service</p>
+            <p><strong>Driver Support:</strong> Contact fleet manager</p>
         </div>
     </div>
 </body>

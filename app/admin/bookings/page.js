@@ -1,13 +1,22 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Calendar } from 'lucide-react'
+import { Calendar, Plus, Edit, Trash2 } from 'lucide-react'
 import DataTable from '@/components/admin/DataTable'
+import SearchableSelect from '@/components/SearchableSelect'
+import { useToast, useConfirm } from '@/components/Toast'
+import { useCurrency } from '@/contexts/CurrencyContext'
+import { currencies, formatCurrency } from '@/lib/currency'
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [currency, setCurrency] = useState('USD')
   const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editingBooking, setEditingBooking] = useState(null)
+  const [formData, setFormData] = useState({ customerId: '', carId: '', startTime: '', endTime: '', status: 'PENDING' })
+  const [deleting, setDeleting] = useState(null)
+  const toast = useToast()
+  const confirm = useConfirm()
+  const { currency } = useCurrency()
 
   useEffect(() => {
     fetchBookings()
@@ -30,68 +39,181 @@ export default function BookingsPage() {
     }
   }
 
-  const currencies = {
-    USD: { symbol: '$', name: 'US Dollar' },
-    LKR: { symbol: 'Rs.', name: 'Sri Lankan Rupee' }
-  }
+
 
   const updateBookingStatus = async (bookingId, status) => {
-    console.log('Updating booking:', bookingId, status)
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/admin/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      })
+      if (response.ok) fetchBookings()
+    } catch (error) {
+      console.error('Error updating booking:', error)
+    }
+  }
+
+  const handleEditBooking = (booking) => {
+    setEditingBooking(booking)
+    setFormData({
+      customerId: booking.customerId,
+      carId: booking.carId,
+      startTime: booking.startTime,
+      endTime: booking.endTime,
+      status: booking.status
+    })
+    setShowModal(true)
+  }
+
+  const handleDeleteBooking = async (bookingId) => {
+    confirm('Delete this booking?', async () => {
+      setDeleting(bookingId)
+      try {
+        const token = localStorage.getItem('token')
+        const response = await fetch(`/api/admin/bookings/${bookingId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        if (response.ok) {
+          toast.success('Booking deleted successfully')
+          fetchBookings()
+        } else {
+          toast.error('Failed to delete booking')
+        }
+      } catch (error) {
+        toast.error('Error deleting booking')
+      } finally {
+        setDeleting(null)
+      }
+    })
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Calendar size={24} /> Booking Management
-        </h2>
-        <select className="select select-bordered" value={currency} onChange={(e) => setCurrency(e.target.value)}>
-          {Object.entries(currencies).map(([code, curr]) => (
-            <option key={code} value={code}>{curr.symbol} {code}</option>
-          ))}
-        </select>
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Calendar className="w-8 h-8" />
+            Booking Management
+          </h1>
+          <p className="text-base-content/70 mt-1">Manage all bookings and reservations</p>
+        </div>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+          <Plus className="w-4 h-4" />
+          Add Booking
+        </button>
       </div>
 
-      <DataTable 
-        title="All Bookings"
-        data={bookings.filter(b => b.customer?.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) || '')}
-        searchTerm={searchTerm}
-        onSearch={setSearchTerm}
+      <DataTable
+        data={bookings}
         columns={[
-          { key: 'id', label: 'ID', render: (row) => row.id?.slice(-8) },
-          { key: 'customer', label: 'Customer', render: (row) => row.customer?.fullName },
-          { key: 'car', label: 'Car', render: (row) => `${row.car?.make} ${row.car?.model}` },
-          { key: 'startTime', label: 'Start Date', render: (row) => new Date(row.startTime).toLocaleDateString() },
+          { key: 'id', label: 'ID', render: (value) => value?.slice(-8) || 'N/A' },
+          { key: 'customerId', label: 'Customer', render: (value, booking) => booking.customer?.name || booking.customer?.email || 'Unknown Customer' },
+          { key: 'carId', label: 'Car', render: (value, booking) => booking.car ? `${booking.car.make} ${booking.car.model}` : 'Unknown Car' },
+          { key: 'startTime', label: 'Start Date', render: (value) => new Date(value).toLocaleDateString() },
           { 
             key: 'status', 
             label: 'Status', 
-            render: (row) => (
+            render: (value) => (
               <span className={`badge ${
-                row.status === 'CONFIRMED' ? 'badge-success' :
-                row.status === 'PENDING' ? 'badge-warning' :
-                row.status === 'CANCELLED' ? 'badge-error' : 'badge-info'
+                value === 'CONFIRMED' ? 'badge-success' :
+                value === 'PENDING' ? 'badge-warning' :
+                value === 'CANCELLED' ? 'badge-error' : 'badge-info'
               }`}>
-                {row.status}
+                {value}
               </span>
             )
           },
-          { key: 'totalPrice', label: 'Total', render: (row) => `${currencies[currency].symbol}${row.totalPrice}` },
+          { key: 'totalPrice', label: 'Total', render: (value) => formatCurrency(value, currency) },
           {
             key: 'actions',
             label: 'Actions',
-            render: (row) => (
-              <div className="dropdown">
-                <label tabIndex={0} className="btn btn-sm">Actions</label>
-                <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
-                  <li><a onClick={() => updateBookingStatus(row.id, 'CONFIRMED')}>Confirm</a></li>
-                  <li><a onClick={() => updateBookingStatus(row.id, 'CANCELLED')}>Cancel</a></li>
-                  <li><a onClick={() => updateBookingStatus(row.id, 'COMPLETED')}>Complete</a></li>
-                </ul>
+            render: (_, booking) => (
+              <div className="flex gap-2">
+                <SearchableSelect
+                  options={[
+                    { value: 'CONFIRMED', label: 'Confirm' },
+                    { value: 'CANCELLED', label: 'Cancel' },
+                    { value: 'COMPLETED', label: 'Complete' }
+                  ]}
+                  value={booking.status}
+                  onChange={(status) => updateBookingStatus(booking.id, status)}
+                  placeholder="Status"
+                  className="w-24"
+                />
+                <button className="btn btn-sm btn-ghost" onClick={() => handleEditBooking(booking)}>
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button 
+                  className="btn btn-sm btn-ghost text-error" 
+                  onClick={() => handleDeleteBooking(booking.id)}
+                  disabled={deleting === booking.id}
+                >
+                  {deleting === booking.id ? (
+                    <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
               </div>
             )
           }
         ]}
+        searchPlaceholder="Search bookings..."
       />
+
+      {showModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">{editingBooking ? 'Edit Booking' : 'Add Booking'}</h3>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              try {
+                const token = localStorage.getItem('token')
+                const url = editingBooking ? `/api/admin/bookings/${editingBooking.id}` : '/api/admin/bookings'
+                const response = await fetch(url, {
+                  method: editingBooking ? 'PUT' : 'POST',
+                  headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify(formData)
+                })
+                if (response.ok) {
+                  setShowModal(false)
+                  setEditingBooking(null)
+                  setFormData({ customerId: '', carId: '', startTime: '', endTime: '', status: 'PENDING' })
+                  fetchBookings()
+                }
+              } catch (error) {
+                console.error('Error saving booking:', error)
+              }
+            }} className="space-y-4 mt-4">
+              <input type="text" placeholder="Customer ID" className="input input-bordered w-full" value={formData.customerId} onChange={(e) => setFormData({...formData, customerId: e.target.value})} required />
+              <input type="text" placeholder="Car ID" className="input input-bordered w-full" value={formData.carId} onChange={(e) => setFormData({...formData, carId: e.target.value})} required />
+              <input type="datetime-local" className="input input-bordered w-full" value={formData.startTime} onChange={(e) => setFormData({...formData, startTime: e.target.value})} required />
+              <input type="datetime-local" className="input input-bordered w-full" value={formData.endTime} onChange={(e) => setFormData({...formData, endTime: e.target.value})} required />
+              <SearchableSelect
+                options={[
+                  { value: 'PENDING', label: 'Pending' },
+                  { value: 'CONFIRMED', label: 'Confirmed' },
+                  { value: 'CANCELLED', label: 'Cancelled' },
+                  { value: 'COMPLETED', label: 'Completed' }
+                ]}
+                value={formData.status}
+                onChange={(value) => setFormData({...formData, status: value})}
+                placeholder="Select status"
+              />
+              <div className="modal-action">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary">{editingBooking ? 'Update' : 'Add'} Booking</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

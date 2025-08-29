@@ -3,6 +3,7 @@ import { memo, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useSidebar } from '@/app/admin/layout'
 import { 
   BarChart3, Calendar, Car, Users, UserCheck, MapPin, 
   DollarSign, TrendingUp, Settings, Clock, ChevronDown,
@@ -49,6 +50,7 @@ function AdminSidebar() {
   const pathname = usePathname()
   const [openMenus, setOpenMenus] = useState({})
   const { hasPermission } = usePermissions()
+  const { sidebarOpen } = useSidebar()
 
   const toggleMenu = useCallback((label) => {
     setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }))
@@ -91,7 +93,7 @@ function AdminSidebar() {
                   <li key={subItem.path}>
                     <Link 
                       href={subItem.path}
-                      className={`flex items-center gap-2 ${pathname === subItem.path ? 'active bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+                      className={`flex items-center gap-2 ${pathname === subItem.path ? 'active bg-gradient-to-r from-primary to-secondary text-white font-semibold shadow-lg border-l-4 border-accent' : 'hover:bg-gradient-to-r hover:from-base-200 hover:to-base-300 text-base-content'}`}
                     >
                       <SubIcon size={14} />
                       {subItem.label}
@@ -109,7 +111,7 @@ function AdminSidebar() {
       <li key={item.path}>
         <Link 
           href={item.path}
-          className={`flex items-center gap-2 ${pathname === item.path ? 'active bg-primary text-primary-content' : 'hover:bg-base-200'}`}
+          className={`flex items-center gap-2 ${pathname === item.path ? 'active bg-gradient-to-r from-primary to-secondary text-white font-semibold shadow-lg border-l-4 border-accent' : 'hover:bg-gradient-to-r hover:from-base-200 hover:to-base-300 text-base-content'}`}
         >
           <Icon size={16} /> {item.label}
         </Link>
@@ -120,7 +122,9 @@ function AdminSidebar() {
   return (
     <div className="w-64 bg-base-100 min-h-screen border-r border-base-300">
       <div className="p-4">
-        <h2 className="text-lg font-bold text-primary mb-4">Admin Panel</h2>
+        <h2 className={`text-lg font-bold text-base-content mb-4 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
+          Admin Panel
+        </h2>
         <ul className="menu menu-sm w-full">
           {menuItems.map(renderMenuItem)}
         </ul>

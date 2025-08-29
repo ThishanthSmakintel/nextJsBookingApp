@@ -1,8 +1,9 @@
 'use client'
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useState, createContext, useContext } from 'react'
 import { useRouter } from 'next/navigation'
 import AdminNavbar from '@/components/admin/AdminNavbar'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import { ToastProvider } from '@/components/Toast'
 import { PermissionProvider } from '@/contexts/PermissionContext'
 import { AbilityProvider } from '@/contexts/AbilityContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -10,6 +11,9 @@ import { LocaleProvider } from '@/contexts/LocaleContext'
 import { CurrencyProvider } from '@/contexts/CurrencyContext'
 import PermissionRefresh from '@/components/PermissionRefresh'
 import PermissionTester from '@/components/PermissionTester'
+
+const SidebarContext = createContext()
+export const useSidebar = () => useContext(SidebarContext)
 
 const MemoizedNavbar = memo(AdminNavbar)
 const MemoizedSidebar = memo(AdminSidebar)
@@ -26,6 +30,7 @@ function decodeToken(token) {
 export default function AdminLayout({ children }) {
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -70,17 +75,23 @@ export default function AdminLayout({ children }) {
         <CurrencyProvider>
           <PermissionProvider>
             <AbilityProvider>
-              <div className="min-h-screen bg-base-200">
-                <MemoizedNavbar />
-                <div className="flex">
-                  <MemoizedSidebar />
-                  <main className="flex-1 p-6">
-                    <PermissionRefresh />
-                    {children}
-                  </main>
-                </div>
-                <PermissionTester />
-              </div>
+              <SidebarContext.Provider value={{ sidebarOpen, setSidebarOpen }}>
+                <ToastProvider>
+                  <div className="min-h-screen bg-base-200">
+                    <MemoizedNavbar />
+                    <div className="flex">
+                      <div className={`transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-0'} overflow-hidden`}>
+                        <MemoizedSidebar />
+                      </div>
+                      <main className="flex-1 p-6">
+                        <PermissionRefresh />
+                        {children}
+                      </main>
+                    </div>
+                    <PermissionTester />
+                  </div>
+                </ToastProvider>
+              </SidebarContext.Provider>
             </AbilityProvider>
           </PermissionProvider>
         </CurrencyProvider>

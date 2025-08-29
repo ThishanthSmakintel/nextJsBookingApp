@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import PermissionGuard from '@/components/PermissionGuard'
+import { useToast } from '@/components/Toast'
 import { Shield, Users, Settings, User, Lock, Check, X, Edit, Save, UserCheck, Calendar, Car, FileText, UserPlus, Trash2 } from 'lucide-react'
 
 export default function StaffPage() {
@@ -11,6 +12,7 @@ export default function StaffPage() {
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [newStaff, setNewStaff] = useState({ name: '', email: '', phone: '', password: '' })
+  const toast = useToast()
 
   useEffect(() => {
     fetchRBACData()
@@ -61,12 +63,34 @@ export default function StaffPage() {
       })
       
       if (response.ok) {
+        toast.success('Staff member added successfully')
         setShowAddModal(false)
         setNewStaff({ name: '', email: '', phone: '', password: '' })
         fetchRBACData()
+      } else {
+        toast.error('Failed to add staff member')
       }
     } catch (error) {
       console.error('Error adding staff:', error)
+    }
+  }
+
+  const handleDeleteStaff = async (staffId) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/admin/staff/${staffId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (response.ok) {
+        toast.success('Staff member deleted successfully')
+        fetchRBACData()
+        if (selectedUser?.id === staffId) setSelectedUser(null)
+      } else {
+        toast.error('Failed to delete staff member')
+      }
+    } catch (error) {
+      toast.error('Error deleting staff member')
     }
   }
 
@@ -105,8 +129,7 @@ export default function StaffPage() {
         fetchRBACData()
         setSelectedUser(null)
         
-        // Show success message
-        console.log('Permissions updated for:', selectedUser.name)
+        toast.success(`Permissions updated for ${selectedUser.name}`)
       }
     } catch (error) {
       console.error('Failed to update permissions:', error)
@@ -151,26 +174,29 @@ export default function StaffPage() {
   return (
     <PermissionGuard resource="staff" action="read">
       <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary to-secondary p-6 rounded-lg text-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Shield className="w-10 h-10" />
-            <div>
-              <h1 className="text-3xl font-bold">Staff & Permissions Management</h1>
-              <p className="opacity-90">Manage staff accounts and their CRUD permissions</p>
-            </div>
-          </div>
-          <button className="btn btn-accent" onClick={() => setShowAddModal(true)}>
-            <UserPlus className="w-4 h-4" />
-            Add Staff
-          </button>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Shield className="w-8 h-8" />
+            Staff & Permissions Management
+          </h1>
+          <p className="text-base-content/70 mt-1">Manage staff accounts and their CRUD permissions</p>
         </div>
+        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+          <UserPlus className="w-4 h-4" />
+          Add Staff
+        </button>
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <span className="loading loading-spinner loading-lg"></span>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full border-4 border-primary/20"></div>
+              <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin absolute top-0"></div>
+            </div>
+            <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -211,11 +237,22 @@ export default function StaffPage() {
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm truncate">{user.name}</div>
                           <div className="text-xs text-base-content/70 truncate">{user.email}</div>
-                          <span className={`badge badge-xs mt-1 ${
-                            user.role === 'STAFF' ? 'badge-warning' : 'badge-info'
-                          }`}>
-                            {user.role}
-                          </span>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className={`badge badge-xs ${
+                              user.role === 'STAFF' ? 'badge-warning' : 'badge-info'
+                            }`}>
+                              {user.role}
+                            </span>
+                            <button 
+                              className="btn btn-xs btn-ghost text-error" 
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteStaff(user.id)
+                              }}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -390,7 +427,7 @@ export default function StaffPage() {
                 />
               </div>
               <div className="modal-action">
-                <button type="button" className="btn" onClick={() => setShowAddModal(false)}>
+                <button type="button" className="btn btn-ghost" onClick={() => setShowAddModal(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary">

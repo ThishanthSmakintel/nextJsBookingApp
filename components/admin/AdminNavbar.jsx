@@ -1,9 +1,10 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Car, Wifi, WifiOff, Bell, RefreshCw, LogOut, X } from 'lucide-react'
+import { Car, Wifi, WifiOff, Bell, RefreshCw, LogOut, X, Menu } from 'lucide-react'
 import { useSocketStore } from '@/stores/socket'
 import { useCurrency } from '@/contexts/CurrencyContext'
+import { useSidebar } from '@/app/admin/layout'
 import ThemeToggle from '../ThemeToggle'
 import LanguageSelector from '../LanguageSelector'
 
@@ -12,6 +13,7 @@ export default function AdminNavbar() {
   const [notifications, setNotifications] = useState([])
   const { currency, changeCurrency, currencies } = useCurrency()
   const { connected, connect } = useSocketStore()
+  const { sidebarOpen, setSidebarOpen } = useSidebar()
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -33,6 +35,14 @@ export default function AdminNavbar() {
 
   return (
     <div className="navbar bg-primary text-primary-content shadow-lg">
+      <div className="flex-none">
+        <button 
+          className="btn btn-ghost btn-square"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          <Menu size={20} />
+        </button>
+      </div>
       <div className="flex-1">
         <a className="btn btn-ghost text-xl">
           <Car className="mr-2" size={24} /> Admin Dashboard

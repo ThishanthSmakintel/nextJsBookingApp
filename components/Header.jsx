@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { Car, Search, LogIn, LogOut, Menu, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
@@ -33,10 +34,10 @@ export default function Header() {
       )}
       
       <div className="flex-1">
-        <a href="/" id="logo" className="btn btn-ghost text-xl">
+        <Link href="/" id="logo" className="btn btn-ghost text-xl" prefetch={true}>
           <Car className="w-6 h-6 mr-2" />
           CarBook
-        </a>
+        </Link>
       </div>
       
       <div className="flex-none gap-2">
@@ -48,10 +49,10 @@ export default function Header() {
             {t('logout')}
           </button>
         ) : (
-          <a href="/login" id="login-btn" className="btn btn-ghost">
+          <Link href="/login" id="login-btn" className="btn btn-ghost" prefetch={true}>
             <LogIn className="w-4 h-4 mr-1" />
             {t('login')}
-          </a>
+          </Link>
         )}
       </div>
     </div>

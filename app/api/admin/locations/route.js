@@ -1,14 +1,10 @@
 import { NextResponse } from 'next/server'
-
-let locations = [
-  { id: '1', name: 'Airport Terminal', address: '123 Airport Rd', city: 'Colombo', active: true },
-  { id: '2', name: 'City Center', address: '456 Main St', city: 'Colombo', active: true },
-  { id: '3', name: 'Hotel District', address: '789 Hotel Ave', city: 'Kandy', active: true }
-]
+import prisma from '@/lib/db'
 
 export async function GET() {
   try {
-    return NextResponse.json(locations)
+    const locations = await prisma.location.findMany()
+    return NextResponse.json({ locations })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch locations' }, { status: 500 })
   }
@@ -17,14 +13,48 @@ export async function GET() {
 export async function POST(request) {
   try {
     const locationData = await request.json()
-    const location = {
-      id: Date.now().toString(),
-      ...locationData,
-      active: true
-    }
-    locations.push(location)
+    
+    const location = await prisma.location.create({
+      data: locationData
+    })
+    
     return NextResponse.json(location)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to create location' }, { status: 500 })
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const url = new URL(request.url)
+    const id = url.pathname.split('/').pop()
+    const locationData = await request.json()
+    
+    const index = locations.findIndex(l => l.id === id)
+    if (index === -1) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+    }
+    
+    locations[index] = { ...locations[index], ...locationData }
+    return NextResponse.json(locations[index])
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update location' }, { status: 500 })
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const url = new URL(request.url)
+    const id = url.pathname.split('/').pop()
+    
+    const index = locations.findIndex(l => l.id === id)
+    if (index === -1) {
+      return NextResponse.json({ error: 'Location not found' }, { status: 404 })
+    }
+    
+    locations.splice(index, 1)
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to delete location' }, { status: 500 })
   }
 }

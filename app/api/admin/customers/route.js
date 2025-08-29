@@ -1,28 +1,13 @@
 import { NextResponse } from 'next/server'
-
-// In-memory storage for demo
-let customers = [
-  {
-    id: '1',
-    email: 'customer1@example.com',
-    name: 'John Doe',
-    phone: '+1234567890',
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: '2', 
-    email: 'customer2@example.com',
-    name: 'Jane Smith',
-    phone: '+1234567891',
-    createdAt: new Date().toISOString()
-  }
-]
+import prisma from '@/lib/db'
 
 export async function GET() {
   try {
+    const customers = await prisma.user.findMany({
+      where: { role: 'CUSTOMER' }
+    })
     return NextResponse.json(customers)
   } catch (error) {
-    console.error('Customers API error:', error)
     return NextResponse.json({ error: 'Failed to fetch customers' }, { status: 500 })
   }
 }
@@ -31,15 +16,14 @@ export async function POST(request) {
   try {
     const { email, name, phone } = await request.json()
     
-    const customer = {
-      id: Date.now().toString(),
-      email: email || '',
-      name,
-      phone: phone || '',
-      createdAt: new Date().toISOString()
-    }
-    
-    customers.push(customer)
+    const customer = await prisma.user.create({
+      data: {
+        email: email || `customer${Date.now()}@example.com`,
+        name,
+        phone: phone || '',
+        role: 'CUSTOMER'
+      }
+    })
     
     return NextResponse.json(customer)
   } catch (error) {

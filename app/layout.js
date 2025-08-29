@@ -1,6 +1,6 @@
 'use client'
 import './globals.css'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 import { usePathname } from 'next/navigation'
 import { driver } from 'driver.js'
 import Header from '@/components/Header'
@@ -74,7 +74,11 @@ export default function RootLayout({ children }) {
                   <input id="drawer-toggle" type="checkbox" className="drawer-toggle" />
                   <div className="drawer-content flex flex-col">
                     <Header />
-                    <main className="flex-1 bg-base-200">{children}</main>
+                    <main className="flex-1 bg-base-200">
+                      <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
+                        {children}
+                      </Suspense>
+                    </main>
                   </div>
                   <div className="drawer-side">
                     <label htmlFor="drawer-toggle" className="drawer-overlay"></label>

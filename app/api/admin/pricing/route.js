@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server'
 
-let pricing = [
-  { id: '1', category: 'Economy', dailyRate: 50, kmRate: 0.5, currency: 'USD' },
-  { id: '2', category: 'Standard', dailyRate: 75, kmRate: 0.75, currency: 'USD' },
-  { id: '3', category: 'Premium', dailyRate: 120, kmRate: 1.2, currency: 'USD' },
-  { id: '4', category: 'Luxury', dailyRate: 200, kmRate: 2.0, currency: 'USD' }
-]
+let pricing = []
 
 export async function GET() {
   try {

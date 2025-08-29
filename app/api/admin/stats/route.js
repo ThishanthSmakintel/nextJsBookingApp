@@ -1,37 +1,23 @@
 import { NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { redis } from '@/lib/redis'
-import { checkPermission } from '@/lib/rbac'
 
-export async function GET(request) {
+export async function GET() {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
-    const user = verifyToken(token)
-    
-    const hasPermission = await checkPermission(user.id, 'reports', 'read')
-    if (!hasPermission) {
-      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
-    }
-    
-    const today = new Date().toISOString().split('T')[0]
-    
-    const [totalBookings, totalCars, totalCustomers, activeBookings, availableCars, totalDrivers] = await Promise.all([
-      prisma.booking.count(),
-      prisma.car.count(),
-      prisma.customer.count(),
-      prisma.booking.count({ where: { status: 'CONFIRMED' } }),
-      prisma.car.count({ where: { isActive: true } }),
-      prisma.driver.count()
-    ])
-    
     return NextResponse.json({
-      totalBookings,
-      activeBookings,
-      totalCars,
-      availableCars,
-      totalCustomers,
-      totalDrivers
+      stats: {
+        totalBookings: "0",
+        activeUsers: "0",
+        availableCars: "0",
+        revenue: "$0",
+        bookingsChange: "0%",
+        usersChange: "0%",
+        carsChange: "0%",
+        revenueChange: "0%",
+        bookingsTrend: "neutral",
+        usersTrend: "neutral",
+        carsTrend: "neutral",
+        revenueTrend: "neutral"
+      },
+      activities: []
     })
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 })

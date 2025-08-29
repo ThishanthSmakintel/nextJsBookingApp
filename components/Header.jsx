@@ -1,10 +1,13 @@
 'use client'
 import { Car, Search, LogIn, LogOut, Menu, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import LanguageSelector from './LanguageSelector'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLocale } from '@/contexts/LocaleContext'
 
 export default function Header() {
   const { user, isLoading, logout } = useAuth()
+  const { t } = useLocale()
 
   if (isLoading) {
     return (
@@ -42,12 +45,12 @@ export default function Header() {
         {user ? (
           <button onClick={logout} className="btn btn-ghost">
             <LogOut className="w-4 h-4 mr-1" />
-            Logout
+            {t('logout')}
           </button>
         ) : (
           <a href="/login" id="login-btn" className="btn btn-ghost">
             <LogIn className="w-4 h-4 mr-1" />
-            Login
+            {t('login')}
           </a>
         )}
       </div>

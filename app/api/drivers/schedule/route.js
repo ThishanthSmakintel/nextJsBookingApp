@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { checkPermission } from '@/lib/rbac'
 
 export async function GET(request) {
   try {
@@ -10,6 +11,10 @@ export async function GET(request) {
     }
     
     const user = verifyToken(token)
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+    
     const { searchParams } = new URL(request.url)
     const driverId = searchParams.get('driverId')
     
@@ -17,9 +22,10 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Driver ID required' }, { status: 400 })
     }
     
-    // Allow admin to view any schedule, others only their own
-    if (user.role !== 'admin' && user.id !== driverId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    // Check permissions - drivers can only view their own schedule
+    const hasPermission = await checkPermission(user.id, 'schedule', 'read')
+    if (!hasPermission && user.id !== driverId) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     
     const schedules = await prisma.driverSchedule.findMany({
@@ -48,9 +54,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
     
-    // Allow admin to update any schedule, others only their own
-    if (user.role !== 'admin' && user.id !== driverId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    // Check permissions - drivers can only update their own schedule
+    const hasPermission = await checkPermission(user.id, 'schedule', 'update')
+    if (!hasPermission && user.id !== driverId) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     
     // Delete existing schedules and create new ones

@@ -32,7 +32,7 @@
     <div class="header">
         <div class="container">
             <h1>🚗 CarBook System</h1>
-            <p style="font-size: 1.2em; margin-top: 10px;">Modern Car Booking Platform with Email Authentication & Dark/Light Mode</p>
+            <p style="font-size: 1.2em; margin-top: 10px;">Modern Car Booking Platform with Multi-language Support & Theme Toggle</p>
         </div>
     </div>
 
@@ -78,6 +78,7 @@
                     <div class="tech-badge">DaisyUI</div>
                     <div class="tech-badge">Driver.js</div>
                     <div class="tech-badge new-feature">Lucide Icons</div>
+                    <div class="tech-badge new-feature">Multi-language (i18n)</div>
                     <div class="tech-badge">Zustand</div>
                 </div>
                 <div class="card">
@@ -110,6 +111,7 @@
                 <li>Modern UI with DaisyUI components</li>
                 <li>Interactive onboarding with Driver.js</li>
                 <li>Dark/Light mode theme switching</li>
+                <li>Multi-language support (English, Spanish, French, Tamil, Sinhala)</li>
                 <li>Lucide React icons throughout</li>
                 <li>Real-time notifications via Socket.IO</li>
                 <li>Responsive design for all devices</li>
@@ -131,11 +133,11 @@
                     </ul>
                 </div>
                 <div class="card">
-                    <h3>Theme System</h3>
+                    <h3>Theme & Language System</h3>
                     <ul class="feature-list">
-                        <li>Automatic dark/light mode detection</li>
-                        <li>Theme persistence in localStorage</li>
-                        <li>Smooth theme transitions</li>
+                        <li>Dark/Light mode toggle with persistence</li>
+                        <li>5 language support with native scripts</li>
+                        <li>Language persistence in localStorage</li>
                         <li>Theme-aware component colors</li>
                     </ul>
                 </div>
@@ -223,10 +225,10 @@
             
             <h3>2. Environment Setup</h3>
             <div class="command">cp .env.example .env</div>
-            <p style="margin: 10px 0; color: #666;">Configure SMTP settings for email authentication:</p>
-            <div class="command">SMTP_HOST=smtp.gmail.com</div>
-            <div class="command">SMTP_USER=your-email@gmail.com</div>
-            <div class="command">SMTP_PASS=your-app-password</div>
+            <p style="margin: 10px 0; color: #666;">Configure database and services:</p>
+            <div class="command">DATABASE_URL="postgresql://user:pass@localhost:5432/carbooking"</div>
+            <div class="command">REDIS_URL="redis://localhost:6379"</div>
+            <div class="command">JWT_SECRET="your-secure-jwt-secret"</div>
             
             <h3>3. Database Setup</h3>
             <div class="command">npm run db:generate</div>
@@ -245,10 +247,10 @@
                 <div class="card">
                     <h3>Public Pages</h3>
                     <ul class="feature-list">
-                        <li>/ - Homepage with theme toggle</li>
-                        <li>/search - Car listings with email auth modal</li>
-                        <li>/login - Email authentication (deprecated)</li>
-                        <li>/register - Auto-registration via email</li>
+                        <li>/ - Homepage with theme & language toggle</li>
+                        <li>/search - Car listings with multilingual UI</li>
+                        <li>/login - User authentication</li>
+                        <li>/register - User registration</li>
                     </ul>
                 </div>
                 <div class="card">
@@ -262,35 +264,48 @@
             </div>
         </div>
 
-        <!-- Email Authentication -->
+        <!-- New Features -->
         <div class="section">
-            <h2>📧 Email Authentication System</h2>
-            <h3>How It Works</h3>
-            <ul class="feature-list">
-                <li>User enters email address</li>
-                <li>System sends 6-digit OTP code</li>
-                <li>User verifies OTP to authenticate</li>
-                <li>New users are automatically registered</li>
-                <li>JWT token issued for session management</li>
-            </ul>
-            
-            <h3>SMTP Configuration</h3>
-            <div class="command">Gmail SMTP: smtp.gmail.com:587</div>
-            <div class="command">Email: dev15.smakintel@gmail.com</div>
-            <div class="command">App Password: lkvzbnjczftffxvi</div>
+            <h2>🆕 Latest Features</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>Multi-language Support</h3>
+                    <ul class="feature-list">
+                        <li>5 languages: EN, ES, FR, TA, SI</li>
+                        <li>Native script support for Tamil/Sinhala</li>
+                        <li>Translation context with useLocale hook</li>
+                        <li>Persistent language preference</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Theme System</h3>
+                    <ul class="feature-list">
+                        <li>Dark/Light mode toggle</li>
+                        <li>DaisyUI theme integration</li>
+                        <li>Theme context with useTheme hook</li>
+                        <li>Automatic theme persistence</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
-        <!-- Theme Configuration -->
+        <!-- Theme & Language Configuration -->
         <div class="section">
-            <h2>🌙 Theme Configuration</h2>
-            <h3>Light Theme Colors</h3>
-            <div class="command">primary: #3b82f6, secondary: #8b5cf6, base-100: #ffffff</div>
+            <h2>🌙 Theme & Language Configuration</h2>
+            <h3>Theme System</h3>
+            <div class="command">Light: primary #3b82f6, base-100 #ffffff</div>
+            <div class="command">Dark: primary #60a5fa, base-100 #111827</div>
+            <div class="command">Toggle: Sun/Moon icon in navbar</div>
             
-            <h3>Dark Theme Colors</h3>
-            <div class="command">primary: #60a5fa, secondary: #a78bfa, base-100: #111827</div>
+            <h3>Multi-language Support</h3>
+            <div class="command">English (en), Spanish (es), French (fr)</div>
+            <div class="command">Tamil (ta) - தமிழ், Sinhala (si) - සිංහල</div>
+            <div class="command">Toggle: Globe icon dropdown in navbar</div>
             
-            <h3>Theme Toggle Usage</h3>
-            <div class="command">Click sun/moon icon in navbar to switch themes</div>
+            <h3>Implementation</h3>
+            <div class="command">ThemeContext + LocaleContext providers</div>
+            <div class="command">Translation keys in /lib/i18n.js</div>
+            <div class="command">Persistent storage in localStorage</div>
         </div>
 
         <!-- Deployment -->

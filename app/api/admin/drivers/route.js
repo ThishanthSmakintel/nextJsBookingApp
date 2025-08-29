@@ -1,14 +1,21 @@
 import { NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import prisma from '@/lib/db'
+import { checkPermission } from '@/lib/rbac'
 
 export async function GET(request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     const user = verifyToken(token)
     
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+    
+    const hasPermission = await checkPermission(user.id, 'drivers', 'read')
+    if (!hasPermission) {
+      console.log('Access denied for user:', user.id, 'to drivers:read')
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     
     const drivers = await prisma.driver.findMany({
@@ -21,6 +28,7 @@ export async function GET(request) {
     
     return NextResponse.json(drivers)
   } catch (error) {
+    console.error('Drivers GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch drivers' }, { status: 500 })
   }
 }
@@ -30,8 +38,14 @@ export async function POST(request) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     const user = verifyToken(token)
     
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+    
+    const hasPermission = await checkPermission(user.id, 'drivers', 'create')
+    if (!hasPermission) {
+      console.log('Access denied for user:', user.id, 'to drivers:create')
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     
     const driverData = await request.json()
@@ -43,6 +57,7 @@ export async function POST(request) {
     
     return NextResponse.json(driver)
   } catch (error) {
+    console.error('Drivers POST error:', error)
     return NextResponse.json({ error: 'Failed to create driver' }, { status: 500 })
   }
 }

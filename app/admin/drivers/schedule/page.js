@@ -1,16 +1,22 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import DriverSchedule from '@/components/DriverSchedule'
 
 export default function AdminDriverSchedulePage() {
   const { user } = useAuth()
+  const searchParams = useSearchParams()
   const [drivers, setDrivers] = useState([])
-  const [selectedDriver, setSelectedDriver] = useState('')
+  const [selectedDriver, setSelectedDriver] = useState(searchParams.get('driverId') || '')
 
   useEffect(() => {
     fetchDrivers()
-  }, [])
+    const driverId = searchParams.get('driverId')
+    if (driverId) {
+      setSelectedDriver(driverId)
+    }
+  }, [searchParams])
 
   const fetchDrivers = async () => {
     try {
@@ -28,7 +34,7 @@ export default function AdminDriverSchedulePage() {
     }
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'ADMIN' && user.role !== 'STAFF')) {
     return <div className="text-center p-8">Access denied</div>
   }
 

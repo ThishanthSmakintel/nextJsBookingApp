@@ -1,8 +1,13 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { LogIn, Globe, Sun, Moon } from 'lucide-react'
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
+import { LocaleProvider, useLocale } from '@/contexts/LocaleContext'
+import ThemeToggle from '@/components/ThemeToggle'
+import LanguageSelector from '@/components/LanguageSelector'
 
-export default function AdminLogin() {
+function AdminLoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -39,9 +44,15 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center">
+      <div className="absolute top-4 right-4 flex gap-2">
+        <ThemeToggle />
+      </div>
       <div className="card w-96 bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title justify-center text-2xl mb-4">Admin Login</h2>
+          <h2 className="card-title justify-center text-2xl mb-4">
+            <LogIn className="w-6 h-6 mr-2" />
+            Admin Login
+          </h2>
           
           <form onSubmit={handleSubmit}>
             <div className="form-control">
@@ -92,5 +103,15 @@ export default function AdminLogin() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function AdminLogin() {
+  return (
+    <ThemeProvider>
+      <LocaleProvider>
+        <AdminLoginForm />
+      </LocaleProvider>
+    </ThemeProvider>
   )
 }

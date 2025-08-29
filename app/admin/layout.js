@@ -4,6 +4,12 @@ import { useRouter } from 'next/navigation'
 import AdminNavbar from '@/components/admin/AdminNavbar'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { PermissionProvider } from '@/contexts/PermissionContext'
+import { AbilityProvider } from '@/contexts/AbilityContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LocaleProvider } from '@/contexts/LocaleContext'
+import { CurrencyProvider } from '@/contexts/CurrencyContext'
+import PermissionRefresh from '@/components/PermissionRefresh'
+import PermissionTester from '@/components/PermissionTester'
 
 const MemoizedNavbar = memo(AdminNavbar)
 const MemoizedSidebar = memo(AdminSidebar)
@@ -32,7 +38,7 @@ export default function AdminLayout({ children }) {
       }
 
       const decoded = decodeToken(token)
-      if (decoded && decoded.role === 'admin' && decoded.exp > Date.now() / 1000) {
+      if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'STAFF') && decoded.exp > Date.now() / 1000) {
         setIsAuthorized(true)
       } else {
         localStorage.removeItem('token')
@@ -59,16 +65,26 @@ export default function AdminLayout({ children }) {
   }
 
   return (
-    <PermissionProvider>
-      <div className="min-h-screen bg-base-200">
-        <MemoizedNavbar />
-        <div className="flex">
-          <MemoizedSidebar />
-          <main className="flex-1 p-6">
-            {children}
-          </main>
-        </div>
-      </div>
-    </PermissionProvider>
+    <ThemeProvider>
+      <LocaleProvider>
+        <CurrencyProvider>
+          <PermissionProvider>
+            <AbilityProvider>
+              <div className="min-h-screen bg-base-200">
+                <MemoizedNavbar />
+                <div className="flex">
+                  <MemoizedSidebar />
+                  <main className="flex-1 p-6">
+                    <PermissionRefresh />
+                    {children}
+                  </main>
+                </div>
+                <PermissionTester />
+              </div>
+            </AbilityProvider>
+          </PermissionProvider>
+        </CurrencyProvider>
+      </LocaleProvider>
+    </ThemeProvider>
   )
 }

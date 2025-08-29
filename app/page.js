@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MapPin, Car, Calendar, Search, Zap, UserCheck, Smartphone, Shield, Clock, Star, Users, Award, CheckCircle } from 'lucide-react'
+import { useLocale } from '@/contexts/LocaleContext'
 
 export default function HomePage() {
   const [searchData, setSearchData] = useState({
@@ -11,6 +12,7 @@ export default function HomePage() {
     category: ''
   })
   const router = useRouter()
+  const { t } = useLocale()
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -40,7 +42,7 @@ export default function HomePage() {
                       <label className="label">
                         <span className="label-text font-semibold flex items-center">
                           <MapPin className="w-4 h-4 mr-2" />
-                          Location
+                          {t('location')}
                         </span>
                       </label>
                       <select 
@@ -60,7 +62,7 @@ export default function HomePage() {
                       <label className="label">
                         <span className="label-text font-semibold flex items-center">
                           <Car className="w-4 h-4 mr-2" />
-                          Category
+                          {t('category')}
                         </span>
                       </label>
                       <select 
@@ -81,7 +83,7 @@ export default function HomePage() {
                       <label className="label">
                         <span className="label-text font-semibold flex items-center">
                           <Calendar className="w-4 h-4 mr-2" />
-                          Start Date
+                          {t('startDate')}
                         </span>
                       </label>
                       <input 
@@ -97,7 +99,7 @@ export default function HomePage() {
                       <label className="label">
                         <span className="label-text font-semibold flex items-center">
                           <Calendar className="w-4 h-4 mr-2" />
-                          End Date
+                          {t('endDate')}
                         </span>
                       </label>
                       <input 
@@ -112,7 +114,7 @@ export default function HomePage() {
 
                   <button type="submit" className="btn btn-primary btn-lg w-full mt-6">
                     <Search className="w-5 h-5 mr-2" />
-                    Search Available Cars
+                    {t('searchCars')}
                   </button>
                 </form>
               </div>

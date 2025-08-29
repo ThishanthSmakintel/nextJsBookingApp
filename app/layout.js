@@ -6,6 +6,8 @@ import { driver } from 'driver.js'
 import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LocaleProvider } from '@/contexts/LocaleContext'
 
 export default function RootLayout({ children }) {
   const pathname = usePathname()
@@ -62,23 +64,27 @@ export default function RootLayout({ children }) {
         <meta name="description" content="Event-driven car rental platform with real-time booking" />
       </head>
       <body className="min-h-screen">
-        <AuthProvider>
-          {isAdminRoute ? (
-            children
-          ) : (
-            <div className="drawer">
-              <input id="drawer-toggle" type="checkbox" className="drawer-toggle" />
-              <div className="drawer-content flex flex-col">
-                <Header />
-                <main className="flex-1 bg-base-200">{children}</main>
-              </div>
-              <div className="drawer-side">
-                <label htmlFor="drawer-toggle" className="drawer-overlay"></label>
-                <Sidebar />
-              </div>
-            </div>
-          )}
-        </AuthProvider>
+        <ThemeProvider>
+          <LocaleProvider>
+            <AuthProvider>
+              {isAdminRoute ? (
+                children
+              ) : (
+                <div className="drawer">
+                  <input id="drawer-toggle" type="checkbox" className="drawer-toggle" />
+                  <div className="drawer-content flex flex-col">
+                    <Header />
+                    <main className="flex-1 bg-base-200">{children}</main>
+                  </div>
+                  <div className="drawer-side">
+                    <label htmlFor="drawer-toggle" className="drawer-overlay"></label>
+                    <Sidebar />
+                  </div>
+                </div>
+              )}
+            </AuthProvider>
+          </LocaleProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

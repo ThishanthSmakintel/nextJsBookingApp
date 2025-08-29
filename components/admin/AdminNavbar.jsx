@@ -3,11 +3,14 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Car, Wifi, WifiOff, Bell, RefreshCw, LogOut, X } from 'lucide-react'
 import { useSocketStore } from '@/stores/socket'
+import { useCurrency } from '@/contexts/CurrencyContext'
+import ThemeToggle from '../ThemeToggle'
+import LanguageSelector from '../LanguageSelector'
 
 export default function AdminNavbar() {
   const router = useRouter()
   const [notifications, setNotifications] = useState([])
-  const [currency, setCurrency] = useState('USD')
+  const { currency, changeCurrency, currencies } = useCurrency()
   const { connected, connect } = useSocketStore()
 
   useEffect(() => {
@@ -17,10 +20,7 @@ export default function AdminNavbar() {
     }
   }, [connect])
 
-  const currencies = {
-    USD: { symbol: '$', name: 'US Dollar' },
-    LKR: { symbol: 'Rs.', name: 'Sri Lankan Rupee' }
-  }
+
 
   const logout = () => {
     localStorage.removeItem('token')
@@ -79,11 +79,13 @@ export default function AdminNavbar() {
           </div>
         </div>
 
-        <select className="select select-sm" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+        <select className="select select-sm" value={currency} onChange={(e) => changeCurrency(e.target.value)}>
           {Object.entries(currencies).map(([code, curr]) => (
             <option key={code} value={code}>{curr.symbol} {code}</option>
           ))}
         </select>
+        
+        <ThemeToggle />
         
         <button className="btn btn-ghost" onClick={logout}>
           <LogOut size={16} /> Logout

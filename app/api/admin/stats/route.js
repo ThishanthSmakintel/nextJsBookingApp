@@ -2,14 +2,16 @@ import { NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { redis } from '@/lib/redis'
+import { checkPermission } from '@/lib/rbac'
 
 export async function GET(request) {
   try {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     const user = verifyToken(token)
     
-    if (user.role !== 'admin') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    const hasPermission = await checkPermission(user.id, 'reports', 'read')
+    if (!hasPermission) {
+      return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
     
     const today = new Date().toISOString().split('T')[0]

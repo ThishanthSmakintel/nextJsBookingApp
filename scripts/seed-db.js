@@ -9,24 +9,21 @@ async function main() {
       data: {
         name: 'Colombo',
         address: 'Colombo, Sri Lanka',
-        lat: 6.9271,
-        lng: 79.8612
+        city: 'Colombo'
       }
     }),
     prisma.location.create({
       data: {
         name: 'Kandy',
         address: 'Kandy, Sri Lanka',
-        lat: 7.2906,
-        lng: 80.6337
+        city: 'Kandy'
       }
     }),
     prisma.location.create({
       data: {
         name: 'Galle',
         address: 'Galle, Sri Lanka',
-        lat: 6.0535,
-        lng: 80.2210
+        city: 'Galle'
       }
     })
   ])
@@ -39,12 +36,7 @@ async function main() {
         model: 'Prius',
         year: 2022,
         licensePlate: 'CAR-001',
-        category: 'economy',
-        dailyRate: 50,
-        kmRate: 0.5,
-        capacity: 5,
-        locationId: locations[0].id,
-        features: { aircon: true, gps: true }
+        pricePerHour: 50
       }
     }),
     prisma.car.create({
@@ -53,12 +45,7 @@ async function main() {
         model: 'X5',
         year: 2023,
         licensePlate: 'CAR-002',
-        category: 'luxury',
-        dailyRate: 150,
-        kmRate: 1.5,
-        capacity: 7,
-        locationId: locations[0].id,
-        features: { aircon: true, gps: true, leather: true }
+        pricePerHour: 150
       }
     }),
     prisma.car.create({
@@ -67,12 +54,7 @@ async function main() {
         model: 'CR-V',
         year: 2022,
         licensePlate: 'CAR-003',
-        category: 'suv',
-        dailyRate: 80,
-        kmRate: 0.8,
-        capacity: 5,
-        locationId: locations[1].id,
-        features: { aircon: true, gps: true }
+        pricePerHour: 80
       }
     })
   ])
@@ -83,43 +65,39 @@ async function main() {
       data: {
         name: 'John Silva',
         phone: '+94771234567',
-        licenseNumber: 'DL001',
-        currentCarId: cars[0].id,
-        skills: { languages: ['English', 'Sinhala'] }
+        licenseNumber: 'DL001'
       }
     }),
     prisma.driver.create({
       data: {
         name: 'Priya Sharma',
         phone: '+94771234568',
-        licenseNumber: 'DL002',
-        currentCarId: cars[1].id,
-        skills: { languages: ['English', 'Hindi'] }
+        licenseNumber: 'DL002'
       }
     })
   ])
 
-  // Create add-ons
-  await Promise.all([
-    prisma.addOn.create({
+  // Create permissions
+  const permissions = await Promise.all([
+    prisma.permission.create({
       data: {
-        name: 'Child Seat',
-        priceType: 'FLAT',
-        price: 10
+        resource: 'booking',
+        action: 'create',
+        description: 'Create bookings'
       }
     }),
-    prisma.addOn.create({
+    prisma.permission.create({
       data: {
-        name: 'GPS Navigation',
-        priceType: 'FLAT',
-        price: 5
+        resource: 'booking',
+        action: 'read',
+        description: 'View bookings'
       }
     }),
-    prisma.addOn.create({
+    prisma.permission.create({
       data: {
-        name: 'Extra Driver',
-        priceType: 'PER_PERSON',
-        price: 15
+        resource: 'car',
+        action: 'manage',
+        description: 'Manage cars'
       }
     })
   ])

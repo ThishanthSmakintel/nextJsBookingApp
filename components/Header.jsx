@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Car, Search, LogIn, LogOut, Menu, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
+import ConnectionStatus from './ConnectionStatus'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLocale } from '@/contexts/LocaleContext'
 
@@ -41,6 +42,7 @@ export default function Header() {
       </div>
       
       <div className="flex-none gap-2">
+        <ConnectionStatus />
         <ThemeToggle />
         
         {user ? (

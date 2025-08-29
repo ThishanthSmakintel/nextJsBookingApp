@@ -32,6 +32,8 @@ const menuItems = [
       { path: '/admin/drivers/schedule', icon: Clock, label: 'Schedules', permission: { resource: 'schedule', action: 'read' } }
     ]
   },
+  { path: '/admin/leave-management', icon: Calendar, label: 'Leave Management', permission: { resource: 'leaves', action: 'read' } },
+  { path: '/admin/maintenance', icon: Settings, label: 'Maintenance', permission: { resource: 'maintenance', action: 'read' } },
   { path: '/admin/locations', icon: MapPin, label: 'Locations' },
   { path: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
   {

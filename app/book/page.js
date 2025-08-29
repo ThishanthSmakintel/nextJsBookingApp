@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import BookingForm from '@/components/BookingForm'
+import { useToast } from '@/components/Toast'
 
 export default function BookPage() {
   const [car, setCar] = useState(null)
   const [lockData, setLockData] = useState(null)
   const router = useRouter()
+  const toast = useToast()
 
   useEffect(() => {
     const selectedCar = localStorage.getItem('selectedCar')
@@ -46,11 +48,11 @@ export default function BookPage() {
           localStorage.clear()
           router.push('/login')
         } else {
-          alert(booking.error)
+          toast.error(booking.error)
         }
       }
     } catch (error) {
-      alert('Booking confirmation failed')
+      toast.error('Booking confirmation failed')
     }
   }
 

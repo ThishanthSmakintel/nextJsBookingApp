@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -33,6 +33,7 @@ model Car {
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
   bookings     Booking[]
+  maintenances Maintenance[]
 }
 
 model Location {
@@ -66,10 +67,15 @@ model Driver {
   id            String    @id @default(cuid())
   name          String
   phone         String
+  email         String?
   licenseNumber String    @unique
+  employeeType  String    @default("PERMANENT")
+  hourlyRate    Float?
+  salary        Float?
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   bookings      Booking[]
+  leaves        Leave[]
 }
 
 model Permission {
@@ -103,4 +109,37 @@ model PricingRule {
   currency     String  @default("USD")
   weekendRate  Float?
   createdAt    DateTime @default(now())
+}
+
+model Leave {
+  id          String   @id @default(cuid())
+  employeeId  String
+  employeeType String
+  leaveType   String
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  status      String   @default("PENDING")
+  approvedBy  String?
+  createdAt   DateTime @default(now())
+  
+  driver      Driver?  @relation(fields: [employeeId], references: [id])
+  
+  @@index([employeeId, startDate, endDate])
+}
+
+model Maintenance {
+  id          String   @id @default(cuid())
+  carId       String
+  type        String
+  description String
+  startDate   DateTime
+  endDate     DateTime?
+  cost        Float?
+  status      String   @default("SCHEDULED")
+  createdAt   DateTime @default(now())
+  
+  car         Car      @relation(fields: [carId], references: [id])
+  
+  @@index([carId, startDate, endDate])
 }

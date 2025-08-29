@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import DataTable from '@/components/admin/DataTable';
 import SearchableSelect from '@/components/SearchableSelect';
-import { useToast } from '@/components/Toast';
+import { useToast, useConfirm } from '@/components/Toast';
 import { Plus, Car, Edit, Trash2 } from 'lucide-react';
 import { currencies, formatCurrency } from '@/lib/currency';
 
@@ -15,6 +15,7 @@ export default function CarsPage() {
   const [formData, setFormData] = useState({ make: '', model: '', year: '', licensePlate: '', pricePerHour: '', currency: 'USD', image: null });
   const [imagePreview, setImagePreview] = useState(null);
   const toast = useToast();
+  const confirm = useConfirm();
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -36,21 +37,23 @@ export default function CarsPage() {
   };
 
   const handleDeleteCar = async (carId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/admin/cars/${carId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        toast.success('Car deleted successfully')
-        fetchCars()
-      } else {
-        toast.error('Failed to delete car')
+    confirm('Are you sure you want to delete this car? This action cannot be undone.', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/admin/cars/${carId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          toast.success('Car deleted successfully')
+          fetchCars()
+        } else {
+          toast.error('Failed to delete car')
+        }
+      } catch (error) {
+        toast.error('Error deleting car')
       }
-    } catch (error) {
-      toast.error('Error deleting car')
-    }
+    });
   };
 
   useEffect(() => {

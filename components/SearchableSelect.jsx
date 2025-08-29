@@ -65,16 +65,19 @@ export default function SearchableSelect({
           ) : (
             filteredOptions.map((option) => (
               <li key={option.value}>
-                <a
-                  className={`text-base-content ${value === option.value ? 'active' : ''}`}
-                  onClick={() => {
+                <button
+                  type="button"
+                  className={`w-full text-left p-2 hover:bg-base-200 ${value === option.value ? 'bg-primary text-primary-content' : 'text-base-content'}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
                     onChange(option.value)
                     setIsOpen(false)
                     setSearch('')
                   }}
                 >
                   {option.label}
-                </a>
+                </button>
               </li>
             ))
           )}

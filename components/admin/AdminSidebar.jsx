@@ -3,7 +3,7 @@ import { memo, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
-import { useSidebar } from '@/app/admin/layout'
+import { useSidebar } from '@/app/dashboard/layout'
 import { 
   BarChart3, Calendar, Car, Users, UserCheck, MapPin, 
   DollarSign, TrendingUp, Settings, Clock, ChevronDown,
@@ -11,41 +11,41 @@ import {
 } from 'lucide-react'
 
 const menuItems = [
-  { path: '/admin/dashboard', icon: BarChart3, label: 'Dashboard' },
+  { path: '/dashboard', icon: BarChart3, label: 'Dashboard' },
   {
     label: 'Bookings',
     icon: Calendar,
     permission: { resource: 'bookings', action: 'read' },
     submenu: [
-      { path: '/admin/create-booking', icon: Plus, label: 'Create Booking', permission: { resource: 'bookings', action: 'create' } },
-      { path: '/admin/bookings', icon: List, label: 'All Bookings', permission: { resource: 'bookings', action: 'read' } }
+      { path: '/dashboard/create-booking', icon: Plus, label: 'Create Booking', permission: { resource: 'bookings', action: 'create' } },
+      { path: '/dashboard/bookings', icon: List, label: 'All Bookings', permission: { resource: 'bookings', action: 'read' } }
     ]
   },
-  { path: '/admin/cars', icon: Car, label: 'Cars', permission: { resource: 'cars', action: 'read' } },
-  { path: '/admin/customers', icon: Users, label: 'Customers', permission: { resource: 'customers', action: 'read' } },
+  { path: '/dashboard/cars', icon: Car, label: 'Cars', permission: { resource: 'cars', action: 'read' } },
+  { path: '/dashboard/customers', icon: Users, label: 'Customers', permission: { resource: 'customers', action: 'read' } },
   {
     label: 'Drivers',
     icon: UserCheck,
     permission: { resource: 'drivers', action: 'read' },
     submenu: [
-      { path: '/admin/drivers', icon: List, label: 'All Drivers', permission: { resource: 'drivers', action: 'read' } },
-      { path: '/admin/drivers/schedule', icon: Clock, label: 'Schedules', permission: { resource: 'schedule', action: 'read' } }
+      { path: '/dashboard/drivers', icon: List, label: 'All Drivers', permission: { resource: 'drivers', action: 'read' } },
+      { path: '/dashboard/drivers/schedule', icon: Clock, label: 'Schedules', permission: { resource: 'schedule', action: 'read' } }
     ]
   },
-  { path: '/admin/leave-management', icon: Calendar, label: 'Leave Management', permission: { resource: 'leaves', action: 'read' } },
-  { path: '/admin/maintenance', icon: Settings, label: 'Maintenance', permission: { resource: 'maintenance', action: 'read' } },
-  { path: '/admin/locations', icon: MapPin, label: 'Locations' },
-  { path: '/admin/pricing', icon: DollarSign, label: 'Pricing' },
+  { path: '/dashboard/leave-management', icon: Calendar, label: 'Leave Management', permission: { resource: 'leaves', action: 'read' } },
+  { path: '/dashboard/maintenance', icon: Settings, label: 'Maintenance', permission: { resource: 'maintenance', action: 'read' } },
+  { path: '/dashboard/locations', icon: MapPin, label: 'Locations' },
+  { path: '/dashboard/pricing', icon: DollarSign, label: 'Pricing' },
   {
     label: 'Management',
     icon: Settings,
     permission: { resource: 'staff', action: 'read' },
     submenu: [
-      { path: '/admin/staff', icon: Users, label: 'Staff & Permissions', permission: { resource: 'staff', action: 'read' } },
-      { path: '/admin/settings', icon: Settings, label: 'Settings' }
+      { path: '/dashboard/staff', icon: Users, label: 'Staff & Permissions', permission: { resource: 'staff', action: 'read' } },
+      { path: '/dashboard/settings', icon: Settings, label: 'Settings' }
     ]
   },
-  { path: '/admin/reports', icon: TrendingUp, label: 'Reports', permission: { resource: 'reports', action: 'read' } }
+  { path: '/dashboard/reports', icon: TrendingUp, label: 'Reports', permission: { resource: 'reports', action: 'read' } }
 ]
 
 function AdminSidebar() {
@@ -61,8 +61,11 @@ function AdminSidebar() {
   const renderMenuItem = (item) => {
     const Icon = item.icon
     
-    // Check permissions for menu items
-    if (item.permission && !hasPermission(item.permission.resource, item.permission.action)) {
+    // Get current user
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    
+    // Check permissions for menu items (skip for admins)
+    if (item.permission && user.role !== 'ADMIN' && !hasPermission(item.permission.resource, item.permission.action)) {
       return null
     }
     
@@ -85,8 +88,8 @@ function AdminSidebar() {
             </summary>
             <ul>
               {item.submenu.map(subItem => {
-                // Check permissions for submenu items
-                if (subItem.permission && !hasPermission(subItem.permission.resource, subItem.permission.action)) {
+                // Check permissions for submenu items (skip for admins)
+                if (subItem.permission && user.role !== 'ADMIN' && !hasPermission(subItem.permission.resource, subItem.permission.action)) {
                   return null
                 }
                 
@@ -125,7 +128,7 @@ function AdminSidebar() {
     <div className="w-64 bg-base-100 min-h-screen border-r border-base-300">
       <div className="p-4">
         <h2 className={`text-lg font-bold text-base-content mb-4 transition-opacity duration-300 ${sidebarOpen ? 'opacity-100' : 'opacity-0'}`}>
-          Admin Panel
+          Dashboard
         </h2>
         <ul className="menu menu-sm w-full">
           {menuItems.map(renderMenuItem)}

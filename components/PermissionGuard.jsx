@@ -3,7 +3,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { Shield, AlertTriangle } from 'lucide-react'
 
 export default function PermissionGuard({ resource, action, children, fallback }) {
-  const { hasPermission, loading } = usePermissions()
+  const { hasPermission, loading, role } = usePermissions()
 
   if (loading) {
     return (
@@ -11,6 +11,11 @@ export default function PermissionGuard({ resource, action, children, fallback }
         <span className="loading loading-spinner loading-sm"></span>
       </div>
     )
+  }
+
+  // Admin users bypass all permission checks
+  if (role === 'ADMIN') {
+    return children
   }
 
   if (!hasPermission(resource, action)) {

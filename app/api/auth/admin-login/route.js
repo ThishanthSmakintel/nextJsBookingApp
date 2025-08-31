@@ -25,9 +25,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
     
-    // Demo login - hardcoded password check
-    const isValid = (email === 'admin@carbook.com' && password === 'admin123') || 
-                   (email === 'staff@carbook.com' && password === 'staff123')
+    // Get user with password for verification
+    const userWithPassword = await prisma.user.findUnique({
+      where: { email }
+    })
+    
+    const isValid = await comparePassword(password, userWithPassword.password)
     
     if (!isValid) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })

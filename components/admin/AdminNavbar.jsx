@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Car, Wifi, WifiOff, Bell, RefreshCw, LogOut, X, Menu } from 'lucide-react'
 import { useSocketStore } from '@/stores/socket'
 import { useCurrency } from '@/contexts/CurrencyContext'
-import { useSidebar } from '@/app/admin/layout'
+import { useSidebar } from '@/app/dashboard/layout'
 import ThemeToggle from '../ThemeToggle'
 import LanguageSelector from '../LanguageSelector'
 
@@ -26,7 +26,7 @@ export default function AdminNavbar() {
 
   const logout = () => {
     localStorage.removeItem('token')
-    router.push('/admin-login')
+    router.push('/staff-login')
   }
 
   const removeNotification = (id) => {

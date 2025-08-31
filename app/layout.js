@@ -8,13 +8,14 @@ import Sidebar from '@/components/Sidebar'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LocaleProvider } from '@/contexts/LocaleContext'
+import { RealTimePermissionProvider } from '@/contexts/RealTimePermissionContext'
 
 export default function RootLayout({ children }) {
   const pathname = usePathname()
-  const isAdminRoute = pathname?.startsWith('/admin')
+  const isDashboardRoute = pathname?.startsWith('/dashboard') || pathname?.startsWith('/staff-login')
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('tour-completed') && !isAdminRoute) {
+    if (typeof window !== 'undefined' && !localStorage.getItem('tour-completed') && !isDashboardRoute) {
       const driverObj = driver({
         showProgress: true,
         showButtons: ['next', 'previous', 'close'],
@@ -55,7 +56,7 @@ export default function RootLayout({ children }) {
       })
       setTimeout(() => driverObj.drive(), 1500)
     }
-  }, [isAdminRoute])
+  }, [isDashboardRoute])
 
   return (
     <html lang="en">
@@ -67,7 +68,8 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <LocaleProvider>
             <AuthProvider>
-              {isAdminRoute ? (
+              <RealTimePermissionProvider>
+              {isDashboardRoute ? (
                 children
               ) : (
                 <div className="drawer">
@@ -86,6 +88,7 @@ export default function RootLayout({ children }) {
                   </div>
                 </div>
               )}
+              </RealTimePermissionProvider>
             </AuthProvider>
           </LocaleProvider>
         </ThemeProvider>

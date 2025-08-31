@@ -32,7 +32,7 @@ function AdminLoginForm() {
       if (response.ok) {
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        router.push('/admin')
+        router.push('/dashboard')
       } else {
         setError(data.error)
       }
@@ -52,7 +52,7 @@ function AdminLoginForm() {
         <div className="card-body">
           <h2 className="card-title justify-center text-2xl mb-4">
             <LogIn className="w-6 h-6 mr-2" />
-            Admin Login
+            Staff Login
           </h2>
           
           <form onSubmit={handleSubmit}>
@@ -62,7 +62,7 @@ function AdminLoginForm() {
               </label>
               <input
                 type="email"
-                placeholder="admin@carbook.com"
+                placeholder="staff@example.com"
                 className="input input-bordered"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

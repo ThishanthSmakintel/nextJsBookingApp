@@ -38,17 +38,17 @@ export default function AdminLayout({ children }) {
       const token = localStorage.getItem('token')
       
       if (!token) {
-        router.push('/admin-login')
+        router.push('/staff-login')
         return
       }
 
       const decoded = decodeToken(token)
-      if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'STAFF') && decoded.exp > Date.now() / 1000) {
+      if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'STAFF' || decoded.role === 'DRIVER') && decoded.exp > Date.now() / 1000) {
         setIsAuthorized(true)
       } else {
         localStorage.removeItem('token')
         localStorage.removeItem('user')
-        router.push('/admin-login')
+        router.push('/staff-login')
       }
       
       setLoading(false)

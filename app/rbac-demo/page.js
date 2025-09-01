@@ -2,6 +2,7 @@
 import { RealTimePermissionProvider } from '@/contexts/RealTimePermissionContext'
 import { PermissionButton, PermissionForm, PermissionSection } from '@/components/DynamicPermissionUI'
 import RealTimePermissionManager from '@/components/admin/RealTimePermissionManager'
+import PermissionDebug from '@/components/PermissionDebug'
 import { useAuth } from '@/contexts/AuthContext'
 
 function DemoContent() {
@@ -19,6 +20,8 @@ function DemoContent() {
           Permissions will update instantly when changed by admin
         </p>
       </div>
+
+      <PermissionDebug />
 
       {/* Dynamic Buttons */}
       <div className="bg-white p-6 rounded-lg shadow">

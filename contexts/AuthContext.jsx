@@ -17,20 +17,28 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    console.log('AuthContext: Initializing auth state')
     const token = localStorage.getItem('token')
     const userData = localStorage.getItem('user')
     
+    console.log('AuthContext: Token exists:', !!token, 'User data exists:', !!userData)
+    
     if (token && userData) {
       try {
-        setUser(JSON.parse(userData))
+        const parsedUser = JSON.parse(userData)
+        console.log('AuthContext: Setting user:', parsedUser)
+        setUser(parsedUser)
       } catch (error) {
+        console.error('AuthContext: Error parsing user data:', error)
         clearSession()
       }
     }
     setIsLoading(false)
+    console.log('AuthContext: Loading set to false')
   }, [])
 
   const login = (userData, token) => {
+    console.log('AuthContext: Logging in user:', userData)
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)

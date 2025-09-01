@@ -1,41 +1,41 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import DataTable from '@/components/admin/DataTable';
-import CanAccess from '@/components/CanAccess';
-import { useToast, useConfirm } from '@/components/Toast';
-import { UserCheck, UserPlus, Edit, Trash2, Calendar } from 'lucide-react';
+'use client'
+import { useState, useEffect } from 'react'
+import DataTable from '@/components/admin/DataTable'
+import PermissionButton from '@/components/PermissionButton'
+import PermissionWrapper from '@/components/PermissionWrapper'
+import { useToast, useConfirm } from '@/components/Toast'
+import { UserCheck, UserPlus, Edit, Trash2, Calendar } from 'lucide-react'
 
 export default function DriversPage() {
-  const [drivers, setDrivers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingDriver, setEditingDriver] = useState(null);
+  const [drivers, setDrivers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [editingDriver, setEditingDriver] = useState(null)
   const [newDriver, setNewDriver] = useState({
     name: '',
     phone: '',
     licenseNumber: '',
     active: true
-  });
-  const [deleting, setDeleting] = useState(null);
-  const toast = useToast();
-  const confirm = useConfirm();
+  })
+  const [deleting, setDeleting] = useState(null)
+  const toast = useToast()
+  const confirm = useConfirm()
 
   const handleEditDriver = (driver) => {
-    setEditingDriver(driver);
-    setNewDriver(driver);
-    setShowAddModal(true);
-  };
+    setEditingDriver(driver)
+    setNewDriver(driver)
+    setShowAddModal(true)
+  }
 
   const handleDeleteDriver = async (driverId) => {
     confirm('Delete this driver?', async () => {
       setDeleting(driverId)
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token')
         const response = await fetch(`/api/admin/drivers/${driverId}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
-        });
+        })
         if (response.ok) {
           toast.success('Driver deleted successfully')
           fetchDrivers()
@@ -48,31 +48,31 @@ export default function DriversPage() {
         setDeleting(null)
       }
     })
-  };
+  }
 
   useEffect(() => {
-    fetchDrivers();
-  }, []);
+    fetchDrivers()
+  }, [])
 
   const fetchDrivers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await fetch('/api/admin/drivers', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
-      });
-      const data = await response.json();
-      setDrivers(Array.isArray(data) ? data : []);
+      })
+      const data = await response.json()
+      setDrivers(Array.isArray(data) ? data : [])
     } catch (error) {
-      console.error('Error fetching drivers:', error);
+      console.error('Error fetching drivers:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleAddDriver = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     
     if (!newDriver.name.trim()) {
       toast.error('Name is required')
@@ -88,8 +88,8 @@ export default function DriversPage() {
     }
     
     try {
-      const token = localStorage.getItem('token');
-      const url = editingDriver ? `/api/admin/drivers/${editingDriver.id}` : '/api/admin/drivers';
+      const token = localStorage.getItem('token')
+      const url = editingDriver ? `/api/admin/drivers/${editingDriver.id}` : '/api/admin/drivers'
       const response = await fetch(url, {
         method: editingDriver ? 'PUT' : 'POST',
         headers: {
@@ -97,21 +97,21 @@ export default function DriversPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(newDriver)
-      });
+      })
       
       if (response.ok) {
         toast.success(editingDriver ? 'Driver updated successfully' : 'Driver added successfully')
-        setShowAddModal(false);
-        setEditingDriver(null);
-        setNewDriver({ name: '', phone: '', licenseNumber: '', active: true });
-        fetchDrivers();
+        setShowAddModal(false)
+        setEditingDriver(null)
+        setNewDriver({ name: '', phone: '', licenseNumber: '', active: true })
+        fetchDrivers()
       } else {
         toast.error('Failed to save driver')
       }
     } catch (error) {
       toast.error('Error saving driver')
     }
-  };
+  }
 
   const columns = [
     { key: 'name', label: 'Name' },
@@ -133,28 +133,31 @@ export default function DriversPage() {
           >
             Schedule
           </button>
-          <CanAccess action="update" subject="Driver" fallback={null}>
-            <button className="btn btn-sm btn-ghost" onClick={() => handleEditDriver(driver)}>
-              <Edit className="w-4 h-4" />
-            </button>
-          </CanAccess>
-          <CanAccess action="delete" subject="Driver" fallback={null}>
-            <button 
-              className="btn btn-sm btn-ghost text-error" 
-              onClick={() => handleDeleteDriver(driver.id)}
-              disabled={deleting === driver.id}
-            >
-              {deleting === driver.id ? (
-                <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <Trash2 className="w-4 h-4" />
-              )}
-            </button>
-          </CanAccess>
+          <PermissionButton 
+            resource="drivers" 
+            action="update" 
+            className="btn btn-sm btn-ghost" 
+            onClick={() => handleEditDriver(driver)}
+          >
+            <Edit className="w-4 h-4" />
+          </PermissionButton>
+          <PermissionButton 
+            resource="drivers" 
+            action="delete" 
+            className="btn btn-sm btn-ghost text-error" 
+            onClick={() => handleDeleteDriver(driver.id)}
+            disabled={deleting === driver.id}
+          >
+            {deleting === driver.id ? (
+              <div className="w-4 h-4 border-2 border-error border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+          </PermissionButton>
         </div>
       )
     }
-  ];
+  ]
 
   if (loading) {
     return (
@@ -167,27 +170,29 @@ export default function DriversPage() {
           <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <CanAccess action="read" subject="Driver">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <UserCheck className="w-8 h-8" />
-              Drivers Management
-            </h1>
-            <p className="text-base-content/70 mt-1">Manage driver accounts and assignments</p>
-          </div>
-          <CanAccess action="create" subject="Driver" fallback={null}>
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-              <UserPlus className="w-4 h-4" />
-              Add Driver
-            </button>
-          </CanAccess>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <UserCheck className="w-8 h-8" />
+            Drivers Management
+          </h1>
+          <p className="text-base-content/70 mt-1">Manage driver accounts and assignments</p>
         </div>
+        <PermissionButton 
+          resource="drivers" 
+          action="create"
+          className="btn btn-primary"
+          onClick={() => setShowAddModal(true)}
+        >
+          <UserPlus className="w-4 h-4" />
+          Add Driver
+        </PermissionButton>
+      </div>
 
       <DataTable
         data={drivers}
@@ -197,56 +202,57 @@ export default function DriversPage() {
 
       {/* Add Driver Modal */}
       {showAddModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">{editingDriver ? 'Edit Driver' : 'Add New Driver'}</h3>
-            <form onSubmit={handleAddDriver} className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Name</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered"
-                  value={newDriver.name}
-                  onChange={(e) => setNewDriver({...newDriver, name: e.target.value})}
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Phone</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered"
-                  value={newDriver.phone}
-                  onChange={(e) => setNewDriver({...newDriver, phone: e.target.value})}
-                />
-              </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">License Number</span>
-                </label>
-                <input
-                  type="text"
-                  className="input input-bordered"
-                  value={newDriver.licenseNumber}
-                  onChange={(e) => setNewDriver({...newDriver, licenseNumber: e.target.value})}
-                />
-              </div>
-              <div className="modal-action">
-                <button type="button" className="btn" onClick={() => setShowAddModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  {editingDriver ? 'Update' : 'Add'} Driver
-                </button>
-              </div>
-            </form>
+        <PermissionWrapper resource="drivers" action={editingDriver ? 'update' : 'create'}>
+          <div className="modal modal-open">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg mb-4">{editingDriver ? 'Edit Driver' : 'Add New Driver'}</h3>
+              <form onSubmit={handleAddDriver} className="space-y-4">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Name</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered"
+                    value={newDriver.name}
+                    onChange={(e) => setNewDriver({...newDriver, name: e.target.value})}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Phone</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered"
+                    value={newDriver.phone}
+                    onChange={(e) => setNewDriver({...newDriver, phone: e.target.value})}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">License Number</span>
+                  </label>
+                  <input
+                    type="text"
+                    className="input input-bordered"
+                    value={newDriver.licenseNumber}
+                    onChange={(e) => setNewDriver({...newDriver, licenseNumber: e.target.value})}
+                  />
+                </div>
+                <div className="modal-action">
+                  <button type="button" className="btn" onClick={() => setShowAddModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {editingDriver ? 'Update' : 'Add'} Driver
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </PermissionWrapper>
       )}
-      </div>
-    </CanAccess>
-  );
+    </div>
+  )
 }

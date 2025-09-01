@@ -4,6 +4,8 @@ import { Calendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import { CalendarDays, Plus, Users, Clock, Check, X, Trash2 } from 'lucide-react'
 import SearchableSelect from '@/components/SearchableSelect'
+import PermissionButton from '@/components/PermissionButton'
+import PermissionWrapper from '@/components/PermissionWrapper'
 import { useToast, useConfirm } from '@/components/Toast'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
@@ -195,10 +197,15 @@ export default function LeaveManagementPage() {
           </h1>
           <p className="text-base-content/70 mt-1">Manage employee leave requests and schedules</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <PermissionButton 
+          resource="leaves" 
+          action="create"
+          className="btn btn-primary"
+          onClick={() => setShowModal(true)}
+        >
           <Plus className="w-4 h-4" />
           Add Leave Request
-        </button>
+        </PermissionButton>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -261,27 +268,33 @@ export default function LeaveManagementPage() {
                     {leave.reason && <div className="text-sm text-base-content/60">{leave.reason}</div>}
                   </div>
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleApprove(leave)}
+                    <PermissionButton 
+                      resource="leaves" 
+                      action="update"
                       className="btn btn-sm btn-success"
+                      onClick={() => handleApprove(leave)}
                     >
                       <Check className="w-4 h-4" />
                       Approve
-                    </button>
-                    <button 
-                      onClick={() => handleReject(leave.id)}
+                    </PermissionButton>
+                    <PermissionButton 
+                      resource="leaves" 
+                      action="update"
                       className="btn btn-sm btn-error"
+                      onClick={() => handleReject(leave.id)}
                     >
                       <X className="w-4 h-4" />
                       Reject
-                    </button>
-                    <button 
-                      onClick={() => handleCancel(leave.id)}
+                    </PermissionButton>
+                    <PermissionButton 
+                      resource="leaves" 
+                      action="delete"
                       className="btn btn-sm btn-ghost"
+                      onClick={() => handleCancel(leave.id)}
                     >
                       <Trash2 className="w-4 h-4" />
                       Cancel
-                    </button>
+                    </PermissionButton>
                   </div>
                 </div>
               ))}
@@ -289,8 +302,6 @@ export default function LeaveManagementPage() {
           </div>
         </div>
       )}
-
-
 
       <div className="card bg-base-100 shadow">
         <div className="card-body">
@@ -371,161 +382,81 @@ export default function LeaveManagementPage() {
         </div>
       </div>
 
-      <dialog className={`modal ${showModal ? 'modal-open' : ''}`}>
-        <div className="modal-box">
-            <h3 className="font-bold text-lg">Add Leave Request</h3>
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="form-control">
-                <label className="label"><span className="label-text">Driver *</span></label>
-                <SearchableSelect
-                  options={Array.isArray(drivers) ? drivers.map(d => ({ value: d.id, label: d.name })) : []}
-                  value={formData.employeeId}
-                  onChange={(value) => setFormData({...formData, employeeId: value})}
-                  placeholder={loading ? "Loading drivers..." : "Select driver"}
-                />
-              </div>
-              
-              <div className="form-control">
-                <label className="label"><span className="label-text">Leave Type *</span></label>
-                <SearchableSelect
-                  options={[
-                    { value: 'VACATION', label: 'Vacation' },
-                    { value: 'SICK', label: 'Sick Leave' },
-                    { value: 'PERSONAL', label: 'Personal' },
-                    { value: 'EMERGENCY', label: 'Emergency' }
-                  ]}
-                  value={formData.leaveType}
-                  onChange={(value) => setFormData({...formData, leaveType: value})}
-                  placeholder="Select leave type"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+      {showModal && (
+        <PermissionWrapper resource="leaves" action="create">
+          <div className="modal modal-open">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg">Add Leave Request</h3>
+              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="form-control">
-                  <label className="label"><span className="label-text">Start Date *</span></label>
-                  <input
-                    type="date"
-                    className="input input-bordered"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                  <label className="label"><span className="label-text">Driver *</span></label>
+                  <SearchableSelect
+                    options={Array.isArray(drivers) ? drivers.map(d => ({ value: d.id, label: d.name })) : []}
+                    value={formData.employeeId}
+                    onChange={(value) => setFormData({...formData, employeeId: value})}
+                    placeholder={loading ? "Loading drivers..." : "Select driver"}
                   />
                 </div>
+                
                 <div className="form-control">
-                  <label className="label"><span className="label-text">End Date *</span></label>
-                  <input
-                    type="date"
-                    className="input input-bordered"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                  <label className="label"><span className="label-text">Leave Type *</span></label>
+                  <SearchableSelect
+                    options={[
+                      { value: 'VACATION', label: 'Vacation' },
+                      { value: 'SICK', label: 'Sick Leave' },
+                      { value: 'PERSONAL', label: 'Personal' },
+                      { value: 'EMERGENCY', label: 'Emergency' }
+                    ]}
+                    value={formData.leaveType}
+                    onChange={(value) => setFormData({...formData, leaveType: value})}
+                    placeholder="Select leave type"
                   />
                 </div>
-              </div>
-              
-              <div className="form-control">
-                <label className="label"><span className="label-text">Reason</span></label>
-                <textarea
-                  className="textarea textarea-bordered"
-                  value={formData.reason}
-                  onChange={(e) => setFormData({...formData, reason: e.target.value})}
-                  placeholder="Optional reason for leave"
-                />
-              </div>
-              
-              <div className="modal-action">
-                <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Create Leave Request
-                </button>
-              </div>
-            </form>
-        </div>
-      </dialog>
-
-      <dialog className={`modal ${showApprovedModal ? 'modal-open' : ''}`}>
-        <div className="modal-box max-w-4xl">
-            <h3 className="font-bold text-lg mb-4">Approved Leaves</h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {leaves.filter(l => l.status === 'APPROVED' && new Date(l.endDate) >= new Date()).map(leave => (
-                <div key={leave.id} className="flex items-center justify-between p-4 border rounded-lg bg-success/10">
-                  <div>
-                    <div className="font-semibold">{leave.driver?.name || 'Employee'}</div>
-                    <div className="text-sm text-base-content/70">
-                      {leave.leaveType} • {new Date(leave.startDate).toLocaleDateString()} - {new Date(leave.endDate).toLocaleDateString()}
-                    </div>
-                    {leave.reason && <div className="text-sm text-base-content/60">{leave.reason}</div>}
-                    <div className="text-xs text-success">Approved by {leave.approvedBy}</div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="form-control">
+                    <label className="label"><span className="label-text">Start Date *</span></label>
+                    <input
+                      type="date"
+                      className="input input-bordered"
+                      value={formData.startDate}
+                      onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                    />
                   </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleCancel(leave.id)
-                      }}
-                      className="btn btn-sm btn-error"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Cancel
-                    </button>
+                  <div className="form-control">
+                    <label className="label"><span className="label-text">End Date *</span></label>
+                    <input
+                      type="date"
+                      className="input input-bordered"
+                      value={formData.endDate}
+                      onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="modal-action">
-              <button className="btn" onClick={() => setShowApprovedModal(false)}>Close</button>
-            </div>
-        </div>
-      </dialog>
-
-      <dialog className={`modal ${showRescheduleModal ? 'modal-open' : ''}`}>
-        <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Approve Leave Request</h3>
-          {selectedLeave && (
-            <div className="space-y-4">
-              <div className="p-4 border rounded-lg bg-base-200">
-                <div className="font-semibold">{selectedLeave.driver?.name || 'Employee'}</div>
-                <div className="text-sm text-base-content/70">
-                  {selectedLeave.leaveType} • {new Date(selectedLeave.startDate).toLocaleDateString()} - {new Date(selectedLeave.endDate).toLocaleDateString()}
+                
+                <div className="form-control">
+                  <label className="label"><span className="label-text">Reason</span></label>
+                  <textarea
+                    className="textarea textarea-bordered"
+                    value={formData.reason}
+                    onChange={(e) => setFormData({...formData, reason: e.target.value})}
+                    placeholder="Optional reason for leave"
+                  />
                 </div>
-                {selectedLeave.reason && <div className="text-sm text-base-content/60">{selectedLeave.reason}</div>}
-              </div>
-              <p className="text-base-content/80">Choose an action for this leave request:</p>
+                
+                <div className="modal-action">
+                  <button type="button" className="btn btn-ghost" onClick={() => setShowModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    Create Leave Request
+                  </button>
+                </div>
+              </form>
             </div>
-          )}
-          <div className="modal-action">
-            <button 
-              className="btn btn-ghost" 
-              onClick={() => setShowRescheduleModal(false)}
-            >
-              Cancel
-            </button>
-            <button 
-              className="btn btn-warning"
-              onClick={() => {
-                setShowRescheduleModal(false)
-                setFormData({
-                  ...formData,
-                  employeeId: selectedLeave.employeeId,
-                  leaveType: selectedLeave.leaveType,
-                  startDate: selectedLeave.startDate.split('T')[0],
-                  endDate: selectedLeave.endDate.split('T')[0],
-                  reason: selectedLeave.reason
-                })
-                setShowModal(true)
-              }}
-            >
-              Reschedule
-            </button>
-            <button 
-              className="btn btn-success" 
-              onClick={confirmApprove}
-            >
-              Approve as is
-            </button>
           </div>
-        </div>
-      </dialog>
+        </PermissionWrapper>
+      )}
     </div>
   )
 }

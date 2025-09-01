@@ -1,58 +1,59 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import DataTable from '@/components/admin/DataTable';
-import { Users, UserPlus, Edit, Trash2 } from 'lucide-react';
+'use client'
+import { useState, useEffect } from 'react'
+import DataTable from '@/components/admin/DataTable'
+import PermissionButton from '@/components/PermissionButton'
+import PermissionWrapper from '@/components/PermissionWrapper'
+import { Users, UserPlus, Edit, Trash2 } from 'lucide-react'
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState(null);
-  const [customerData, setCustomerData] = useState({ name: '', email: '', phone: '' });
-  const [errors, setErrors] = useState({});
+  const [customers, setCustomers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showModal, setShowModal] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState(null)
+  const [customerData, setCustomerData] = useState({ name: '', email: '', phone: '' })
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    fetchCustomers()
+  }, [])
 
   const fetchCustomers = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await fetch('/api/admin/customers', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
-      });
-      const data = await response.json();
-      setCustomers(Array.isArray(data) ? data : []);
+      })
+      const data = await response.json()
+      setCustomers(Array.isArray(data) ? data : [])
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      console.error('Error fetching customers:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!customerData.name.trim()) newErrors.name = 'Name is required';
+    const newErrors = {}
+    if (!customerData.name.trim()) newErrors.name = 'Name is required'
     if (customerData.email && !/\S+@\S+\.\S+/.test(customerData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = 'Invalid email format'
     }
     if (customerData.phone && !/^[+]?[0-9\s-()]+$/.test(customerData.phone)) {
-      newErrors.phone = 'Invalid phone format';
+      newErrors.phone = 'Invalid phone format'
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSaveCustomer = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return
     
     try {
-      const token = localStorage.getItem('token');
-      const url = editingCustomer ? `/api/admin/customers/${editingCustomer.id}` : '/api/admin/customers';
-      const method = editingCustomer ? 'PUT' : 'POST';
+      const token = localStorage.getItem('token')
+      const url = editingCustomer ? `/api/admin/customers/${editingCustomer.id}` : '/api/admin/customers'
+      const method = editingCustomer ? 'PUT' : 'POST'
       
       const response = await fetch(url, {
         method,
@@ -61,47 +62,47 @@ export default function CustomersPage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(customerData)
-      });
+      })
       
       if (response.ok) {
-        fetchCustomers();
-        closeModal();
+        fetchCustomers()
+        closeModal()
       }
     } catch (error) {
-      console.error('Error saving customer:', error);
+      console.error('Error saving customer:', error)
     }
-  };
+  }
 
   const handleEditCustomer = (customer) => {
-    setEditingCustomer(customer);
-    setCustomerData({ name: customer.name, email: customer.email, phone: customer.phone });
-    setShowModal(true);
-  };
+    setEditingCustomer(customer)
+    setCustomerData({ name: customer.name, email: customer.email, phone: customer.phone })
+    setShowModal(true)
+  }
 
   const handleDeleteCustomer = async (customerId) => {
-    if (!confirm('Are you sure you want to delete this customer?')) return;
+    if (!confirm('Are you sure you want to delete this customer?')) return
     
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       const response = await fetch(`/api/admin/customers/${customerId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
-      });
+      })
       
       if (response.ok) {
-        fetchCustomers();
+        fetchCustomers()
       }
     } catch (error) {
-      console.error('Error deleting customer:', error);
+      console.error('Error deleting customer:', error)
     }
-  };
+  }
 
   const closeModal = () => {
-    setShowModal(false);
-    setEditingCustomer(null);
-    setCustomerData({ name: '', email: '', phone: '' });
-    setErrors({});
-  };
+    setShowModal(false)
+    setEditingCustomer(null)
+    setCustomerData({ name: '', email: '', phone: '' })
+    setErrors({})
+  }
 
   const columns = [
     { key: 'name', label: 'Name' },
@@ -118,16 +119,26 @@ export default function CustomersPage() {
       label: 'Actions',
       render: (_, customer) => (
         <div className="flex gap-2">
-          <button className="btn btn-sm btn-ghost" onClick={() => handleEditCustomer(customer)}>
+          <PermissionButton 
+            resource="customers" 
+            action="update" 
+            className="btn btn-sm btn-ghost" 
+            onClick={() => handleEditCustomer(customer)}
+          >
             <Edit className="w-4 h-4" />
-          </button>
-          <button className="btn btn-sm btn-ghost text-error" onClick={() => handleDeleteCustomer(customer.id)}>
+          </PermissionButton>
+          <PermissionButton 
+            resource="customers" 
+            action="delete" 
+            className="btn btn-sm btn-ghost text-error" 
+            onClick={() => handleDeleteCustomer(customer.id)}
+          >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </PermissionButton>
         </div>
       )
     }
-  ];
+  ]
 
   if (loading) {
     return (
@@ -140,7 +151,7 @@ export default function CustomersPage() {
           <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -153,10 +164,15 @@ export default function CustomersPage() {
           </h1>
           <p className="text-base-content/70 mt-1">Manage customer accounts and information</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <PermissionButton 
+          resource="customers" 
+          action="create"
+          className="btn btn-primary"
+          onClick={() => setShowModal(true)}
+        >
           <UserPlus className="w-4 h-4" />
           Add Customer
-        </button>
+        </PermissionButton>
       </div>
 
       <DataTable
@@ -166,62 +182,64 @@ export default function CustomersPage() {
       />
 
       {showModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">
-              {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
-            </h3>
-            
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Name *</span>
-              </label>
-              <input
-                type="text"
-                className={`input input-bordered ${errors.name ? 'input-error' : ''}`}
-                value={customerData.name}
-                onChange={(e) => setCustomerData({...customerData, name: e.target.value})}
-              />
-              {errors.name && <span className="text-error text-sm">{errors.name}</span>}
-            </div>
+        <PermissionWrapper resource="customers" action={editingCustomer ? 'update' : 'create'}>
+          <div className="modal modal-open">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg mb-4">
+                {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
+              </h3>
+              
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Name *</span>
+                </label>
+                <input
+                  type="text"
+                  className={`input input-bordered ${errors.name ? 'input-error' : ''}`}
+                  value={customerData.name}
+                  onChange={(e) => setCustomerData({...customerData, name: e.target.value})}
+                />
+                {errors.name && <span className="text-error text-sm">{errors.name}</span>}
+              </div>
 
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Email (optional)</span>
-              </label>
-              <input
-                type="email"
-                className={`input input-bordered ${errors.email ? 'input-error' : ''}`}
-                value={customerData.email}
-                onChange={(e) => setCustomerData({...customerData, email: e.target.value})}
-              />
-              {errors.email && <span className="text-error text-sm">{errors.email}</span>}
-            </div>
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Email (optional)</span>
+                </label>
+                <input
+                  type="email"
+                  className={`input input-bordered ${errors.email ? 'input-error' : ''}`}
+                  value={customerData.email}
+                  onChange={(e) => setCustomerData({...customerData, email: e.target.value})}
+                />
+                {errors.email && <span className="text-error text-sm">{errors.email}</span>}
+              </div>
 
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Phone (optional)</span>
-              </label>
-              <input
-                type="tel"
-                className={`input input-bordered ${errors.phone ? 'input-error' : ''}`}
-                value={customerData.phone}
-                onChange={(e) => setCustomerData({...customerData, phone: e.target.value})}
-              />
-              {errors.phone && <span className="text-error text-sm">{errors.phone}</span>}
-            </div>
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Phone (optional)</span>
+                </label>
+                <input
+                  type="tel"
+                  className={`input input-bordered ${errors.phone ? 'input-error' : ''}`}
+                  value={customerData.phone}
+                  onChange={(e) => setCustomerData({...customerData, phone: e.target.value})}
+                />
+                {errors.phone && <span className="text-error text-sm">{errors.phone}</span>}
+              </div>
 
-            <div className="modal-action">
-              <button className="btn btn-ghost" onClick={closeModal}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={handleSaveCustomer}>
-                {editingCustomer ? 'Update' : 'Add'} Customer
-              </button>
+              <div className="modal-action">
+                <button className="btn btn-ghost" onClick={closeModal}>
+                  Cancel
+                </button>
+                <button className="btn btn-primary" onClick={handleSaveCustomer}>
+                  {editingCustomer ? 'Update' : 'Add'} Customer
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </PermissionWrapper>
       )}
     </div>
-  );
+  )
 }

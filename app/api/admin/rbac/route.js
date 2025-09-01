@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { assignPermissions } from '@/lib/rbac'
+import { emitPermissionUpdate, emitToAdmin } from '@/lib/socket'
 
 const prisma = new PrismaClient()
 
@@ -45,6 +46,19 @@ export async function POST(request) {
     const success = await assignPermissions(userId, userPermissions)
     
     if (success) {
+      // Emit real-time permission update to the affected user
+      emitPermissionUpdate(userId, userPermissions)
+      
+      // Emit to admin room for dashboard updates
+      emitToAdmin('rbac_updated', {
+        userId,
+        permissions: userPermissions,
+        updatedBy: user.id,
+        timestamp: new Date().toISOString()
+      })
+      
+      console.log(`Permissions updated for user ${userId}, emitted real-time updates`)
+      
       return NextResponse.json({ success: true })
     } else {
       return NextResponse.json({ error: 'Failed to update permissions' }, { status: 500 })

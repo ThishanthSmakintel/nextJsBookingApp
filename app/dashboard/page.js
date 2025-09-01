@@ -1,8 +1,24 @@
 'use client'
+import { useState, useEffect } from 'react'
 import QuickActions from '@/components/admin/QuickActions'
+import PermissionWrapper from '@/components/PermissionWrapper'
+import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates'
 import { LayoutDashboard, Users, Car, Calendar, DollarSign } from 'lucide-react'
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState({ bookings: 0, users: 0, cars: 0, revenue: 0 })
+  const [recentActivity, setRecentActivity] = useState([])
+
+  useRealTimeUpdates({
+    onBookingUpdate: (data) => {
+      setRecentActivity(prev => [{
+        id: Date.now(),
+        message: `Booking ${data.type.split('.')[1]}`,
+        time: new Date().toLocaleTimeString()
+      }, ...prev.slice(0, 4)])
+    }
+  })
+
   return (
     <div className="space-y-6">
       <div>
@@ -19,7 +35,7 @@ export default function DashboardPage() {
             <Calendar className="w-8 h-8" />
           </div>
           <div className="stat-title">Total Bookings</div>
-          <div className="stat-value">0</div>
+          <div className="stat-value">{stats.bookings}</div>
         </div>
         
         <div className="stat bg-base-100 shadow">
@@ -27,7 +43,7 @@ export default function DashboardPage() {
             <Users className="w-8 h-8" />
           </div>
           <div className="stat-title">Active Users</div>
-          <div className="stat-value">0</div>
+          <div className="stat-value">{stats.users}</div>
         </div>
         
         <div className="stat bg-base-100 shadow">
@@ -35,7 +51,7 @@ export default function DashboardPage() {
             <Car className="w-8 h-8" />
           </div>
           <div className="stat-title">Available Cars</div>
-          <div className="stat-value">0</div>
+          <div className="stat-value">{stats.cars}</div>
         </div>
         
         <div className="stat bg-base-100 shadow">
@@ -43,18 +59,36 @@ export default function DashboardPage() {
             <DollarSign className="w-8 h-8" />
           </div>
           <div className="stat-title">Revenue</div>
-          <div className="stat-value">$0</div>
+          <div className="stat-value">${stats.revenue}</div>
         </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QuickActions />
+        <PermissionWrapper resource="dashboard" action="read" showDisabled={false} fallback={
+          <div className="card bg-base-100 shadow">
+            <div className="card-body">
+              <h3 className="card-title">Access Restricted</h3>
+              <p className="text-sm text-base-content/70">You don't have permission to access quick actions.</p>
+            </div>
+          </div>
+        }>
+          <QuickActions />
+        </PermissionWrapper>
         
         <div className="card bg-base-100 shadow">
           <div className="card-body">
             <h3 className="card-title">Recent Activity</h3>
             <div className="space-y-3">
-              <p className="text-sm text-base-content/70">No recent activity</p>
+              {recentActivity.length === 0 ? (
+                <p className="text-sm text-base-content/70">No recent activity</p>
+              ) : (
+                recentActivity.map(activity => (
+                  <div key={activity.id} className="flex justify-between text-sm">
+                    <span>{activity.message}</span>
+                    <span className="text-base-content/50">{activity.time}</span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

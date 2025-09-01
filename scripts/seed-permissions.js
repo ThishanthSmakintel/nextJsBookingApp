@@ -40,6 +40,34 @@ const permissions = [
   { resource: 'schedule', action: 'read' },
   { resource: 'schedule', action: 'update' },
   
+  // Leaves
+  { resource: 'leaves', action: 'create' },
+  { resource: 'leaves', action: 'read' },
+  { resource: 'leaves', action: 'update' },
+  { resource: 'leaves', action: 'delete' },
+  
+  // Maintenance
+  { resource: 'maintenance', action: 'create' },
+  { resource: 'maintenance', action: 'read' },
+  { resource: 'maintenance', action: 'update' },
+  { resource: 'maintenance', action: 'delete' },
+  
+  // Locations
+  { resource: 'locations', action: 'create' },
+  { resource: 'locations', action: 'read' },
+  { resource: 'locations', action: 'update' },
+  { resource: 'locations', action: 'delete' },
+  
+  // Pricing
+  { resource: 'pricing', action: 'create' },
+  { resource: 'pricing', action: 'read' },
+  { resource: 'pricing', action: 'update' },
+  { resource: 'pricing', action: 'delete' },
+  
+  // Settings
+  { resource: 'settings', action: 'read' },
+  { resource: 'settings', action: 'update' },
+  
   // RBAC
   { resource: 'rbac', action: 'read' },
   { resource: 'rbac', action: 'update' }

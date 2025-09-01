@@ -1,22 +1,23 @@
 'use client'
 import { memo, useEffect, useState, createContext, useContext } from 'react'
 import { useRouter } from 'next/navigation'
-import AdminNavbar from '@/components/admin/AdminNavbar'
-import AdminSidebar from '@/components/admin/AdminSidebar'
+import DashboardNavbar from '@/components/admin/DashboardNavbar'
+import DashboardSidebar from '@/components/admin/DashboardSidebar'
 import { ToastProvider } from '@/components/Toast'
 import { PermissionProvider } from '@/contexts/PermissionContext'
 import { AbilityProvider } from '@/contexts/AbilityContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LocaleProvider } from '@/contexts/LocaleContext'
 import { CurrencyProvider } from '@/contexts/CurrencyContext'
+import { SocketProvider } from '@/contexts/SocketContext'
 import PermissionRefresh from '@/components/PermissionRefresh'
-import PermissionTester from '@/components/PermissionTester'
+import RBACStatus from '@/components/RBACStatus'
 
 const SidebarContext = createContext()
 export const useSidebar = () => useContext(SidebarContext)
 
-const MemoizedNavbar = memo(AdminNavbar)
-const MemoizedSidebar = memo(AdminSidebar)
+const MemoizedNavbar = memo(DashboardNavbar)
+const MemoizedSidebar = memo(DashboardSidebar)
 
 function decodeToken(token) {
   try {
@@ -73,8 +74,9 @@ export default function AdminLayout({ children }) {
     <ThemeProvider>
       <LocaleProvider>
         <CurrencyProvider>
-          <PermissionProvider>
-            <AbilityProvider>
+          <SocketProvider>
+            <PermissionProvider>
+              <AbilityProvider>
               <SidebarContext.Provider value={{ sidebarOpen, setSidebarOpen }}>
                 <ToastProvider>
                   <div className="min-h-screen bg-base-200">
@@ -88,12 +90,13 @@ export default function AdminLayout({ children }) {
                         {children}
                       </main>
                     </div>
-                    <PermissionTester />
+                    <RBACStatus />
                   </div>
                 </ToastProvider>
               </SidebarContext.Provider>
-            </AbilityProvider>
-          </PermissionProvider>
+              </AbilityProvider>
+            </PermissionProvider>
+          </SocketProvider>
         </CurrencyProvider>
       </LocaleProvider>
     </ThemeProvider>

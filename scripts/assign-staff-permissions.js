@@ -2,54 +2,77 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+const staffPermissions = [
+  'bookings:create',
+  'bookings:read', 
+  'bookings:update',
+  'bookings:delete',
+  'cars:create',
+  'cars:read',
+  'cars:update',
+  'cars:delete',
+  'customers:create',
+  'customers:read',
+  'customers:update',
+  'customers:delete',
+  'drivers:create',
+  'drivers:read',
+  'drivers:update',
+  'drivers:delete',
+  'schedule:read',
+  'schedule:update',
+  'leaves:read',
+  'leaves:create',
+  'leaves:update',
+  'maintenance:read',
+  'maintenance:create',
+  'maintenance:update',
+  'reports:read',
+  'rbac:read',
+  'rbac:update',
+  'staff:read'
+]
+
 async function assignStaffPermissions() {
   try {
-    const staffUser = await prisma.user.findUnique({
-      where: { email: 'staff@carbook.com' }
+    console.log('Assigning permissions to staff users...')
+    
+    const staffUsers = await prisma.user.findMany({
+      where: { role: 'STAFF' }
     })
-
-    if (!staffUser) {
-      console.log('Staff user not found')
-      return
-    }
-
-    // Basic permissions for staff
-    const staffPermissions = [
-      'bookings:create', 'bookings:read', 'bookings:update',
-      'cars:read', 'customers:read', 'drivers:read',
-      'staff:read' // Add staff read permission
-    ]
-
-    // Clear existing permissions
-    await prisma.userPermission.deleteMany({
-      where: { userId: staffUser.id }
-    })
-
-    // Assign new permissions
-    for (const permStr of staffPermissions) {
-      const [resource, action] = permStr.split(':')
+    
+    console.log(`Found ${staffUsers.length} staff users`)
+    
+    for (const user of staffUsers) {
+      console.log(`Assigning permissions to ${user.email}`)
       
-      let permission = await prisma.permission.findUnique({
-        where: { resource_action: { resource, action } }
-      })
-
-      if (!permission) {
-        permission = await prisma.permission.create({
-          data: { resource, action }
+      for (const permStr of staffPermissions) {
+        const [resource, action] = permStr.split(':')
+        
+        const permission = await prisma.permission.findUnique({
+          where: { resource_action: { resource, action } }
         })
-      }
-
-      await prisma.userPermission.create({
-        data: {
-          userId: staffUser.id,
-          permissionId: permission.id,
-          granted: true
+        
+        if (permission) {
+          await prisma.userPermission.upsert({
+            where: {
+              userId_permissionId: {
+                userId: user.id,
+                permissionId: permission.id
+              }
+            },
+            update: { granted: true },
+            create: {
+              userId: user.id,
+              permissionId: permission.id,
+              granted: true
+            }
+          })
         }
-      })
+      }
     }
-
+    
     console.log('Staff permissions assigned successfully')
-    console.log('Assigned permissions:', staffPermissions)
   } catch (error) {
     console.error('Error assigning staff permissions:', error)
   } finally {

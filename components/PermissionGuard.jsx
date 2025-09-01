@@ -1,11 +1,25 @@
 'use client'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Shield, AlertTriangle } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 export default function PermissionGuard({ resource, action, children, fallback }) {
   const { hasPermission, loading, role } = usePermissions()
+  const [forceShow, setForceShow] = useState(false)
 
-  if (loading) {
+  // Timeout to prevent infinite loading
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('PermissionGuard loading timeout, forcing show')
+        setForceShow(true)
+      }
+    }, 5000) // 5 second timeout
+    
+    return () => clearTimeout(timeout)
+  }, [loading])
+
+  if (loading && !forceShow) {
     return (
       <div className="flex items-center justify-center p-4">
         <span className="loading loading-spinner loading-sm"></span>

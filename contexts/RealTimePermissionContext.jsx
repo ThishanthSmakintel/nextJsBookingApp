@@ -34,8 +34,27 @@ export function RealTimePermissionProvider({ children }) {
     })
 
     newSocket.on('permission_update', (data) => {
-      console.log('Permission update received:', data.permissions)
+      console.log('🔔 Permission update received:', data)
+      console.log('📋 New permissions:', data.permissions)
       updatePermissions(data.permissions)
+      
+      // Show immediate notification
+      const toast = document.createElement('div')
+      toast.className = 'toast toast-top toast-end z-50'
+      toast.innerHTML = `
+        <div class="alert alert-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Your permissions have been updated! You now have ${data.permissions.length} permissions.</span>
+        </div>
+      `
+      document.body.appendChild(toast)
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast)
+        }
+      }, 5000)
     })
 
     newSocket.on('disconnect', () => {

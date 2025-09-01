@@ -2,6 +2,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { defineAbilityFor } from '@/lib/casl'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePermissionStore } from '@/stores/permissions'
+import { useSocket } from '@/contexts/SocketContext'
 
 const AbilityContext = createContext()
 
@@ -15,82 +17,89 @@ export const useAbility = () => {
 
 export const AbilityProvider = ({ children }) => {
   const { user } = useAuth()
+  const { socket } = useSocket()
   const [ability, setAbility] = useState(() => defineAbilityFor(null, []))
-  const [permissions, setPermissions] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [version, setVersion] = useState(0)
+  const { permissions, loading, lastUpdate, initializePermissions, refreshPermissions, reset } = usePermissionStore()
 
-  const fetchPermissions = async () => {
-    if (!user) {
-      setLoading(false)
-      return
+  // Initialize permissions when user changes
+  useEffect(() => {
+    if (user?.id) {
+      console.log('AbilityContext: User loaded, initializing permissions for:', user.id)
+      // Small delay to ensure user is fully loaded
+      setTimeout(() => {
+        initializePermissions(user.id)
+      }, 100)
+    } else {
+      console.log('AbilityContext: No user, resetting')
+      reset()
     }
+  }, [user?.id, initializePermissions, reset])
 
-    try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('/api/user/permissions', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+  // Listen for Socket.IO permission updates
+  useEffect(() => {
+    if (!socket || !user?.id) return
+
+    const handlePermissionUpdate = (data) => {
+      console.log('AbilityContext: Socket permission update received:', data)
       
-      if (response.ok) {
-        const data = await response.json()
-        const userPermissions = data.permissions || []
-        setPermissions(userPermissions)
-        
-        // Create ability with permissions
-        const userAbility = defineAbilityFor(user, userPermissions)
-        setAbility(userAbility)
-      }
-    } catch (error) {
-      console.error('Failed to fetch permissions:', error)
-    } finally {
-      setLoading(false)
+      // Show notification
+      const toast = document.createElement('div')
+      toast.className = 'toast toast-top toast-end z-50'
+      toast.innerHTML = `
+        <div class="alert alert-success">
+          <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>🔔 Your permissions have been updated! You now have ${data.permissions?.length || 'new'} permissions.</span>
+          <button class="btn btn-sm btn-ghost" onclick="this.parentElement.parentElement.remove()">✕</button>
+        </div>
+      `
+      document.body.appendChild(toast)
+      setTimeout(() => {
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast)
+        }
+      }, 5000)
+      
+      // Force refresh permissions from server
+      usePermissionStore.getState().forceRefresh(user.id)
     }
-  }
 
-  useEffect(() => {
-    fetchPermissions()
-  }, [user])
+    socket.on('permission_update', handlePermissionUpdate)
+    return () => socket.off('permission_update', handlePermissionUpdate)
+  }, [socket, user?.id, refreshPermissions])
 
+  // Update ability when permissions change
   useEffect(() => {
-    if (!user) return
+    console.log('AbilityContext: Permissions changed, updating ability:', permissions.length, permissions)
+    const userAbility = defineAbilityFor(user, permissions)
+    setAbility(userAbility)
     
-    // Listen for permission updates
-    const handlePermissionUpdate = () => {
-      const userPermissions = localStorage.getItem(`permissions_${user.id}`)
-      if (userPermissions) {
-        const perms = JSON.parse(userPermissions)
-        setPermissions(perms)
-        const userAbility = defineAbilityFor(user, perms)
-        setAbility(userAbility)
-        console.log('Ability updated:', perms)
-        // Force re-render
-        window.dispatchEvent(new Event('permissions-changed'))
-      }
-    }
+    // Force React re-render by updating version
+    setVersion(prev => prev + 1)
     
-    const handleStorageChange = (e) => {
-      if (e.key === `permissions_${user.id}` || e.key === 'permissions_updated') {
-        handlePermissionUpdate()
-      }
-    }
-    
-    const handlePermissionChange = () => {
-      handlePermissionUpdate()
-    }
-    
-    window.addEventListener('storage', handleStorageChange)
-    window.addEventListener('permissions-changed', handlePermissionChange)
-    const interval = setInterval(handlePermissionUpdate, 500)
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange)
-      window.removeEventListener('permissions-changed', handlePermissionChange)
-      clearInterval(interval)
-    }
-  }, [user])
+    // Dispatch event for components that need it
+    window.dispatchEvent(new Event('permissions-changed'))
+  }, [user, permissions])
 
   return (
-    <AbilityContext.Provider value={{ ability, permissions, loading, user }}>
+    <AbilityContext.Provider value={{ 
+      ability, 
+      permissions, 
+      loading, 
+      user, 
+      lastUpdate,
+      version,
+      refreshPermissions: () => {
+        console.log('AbilityContext: Manual refresh triggered')
+        return refreshPermissions(user?.id)
+      },
+      forceRefresh: () => {
+        console.log('AbilityContext: Force refresh triggered')
+        return usePermissionStore.getState().forceRefresh(user?.id)
+      }
+    }}>
       {children}
     </AbilityContext.Provider>
   )

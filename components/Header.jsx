@@ -46,10 +46,19 @@ export default function Header() {
         <ThemeToggle />
         
         {user ? (
-          <button onClick={logout} className="btn btn-ghost">
-            <LogOut className="w-4 h-4 mr-1" />
-            {t('logout')}
-          </button>
+          <>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-2 bg-primary-focus rounded-lg">
+              <User className="w-4 h-4" />
+              <span className="text-sm">
+                Welcome, <span className="font-semibold">{user.name}</span>
+                <span className="badge badge-secondary badge-sm ml-2">{user.role}</span>
+              </span>
+            </div>
+            <button onClick={logout} className="btn btn-ghost">
+              <LogOut className="w-4 h-4 mr-1" />
+              {t('logout')}
+            </button>
+          </>
         ) : (
           <Link href="/login" id="login-btn" className="btn btn-ghost" prefetch={true}>
             <LogIn className="w-4 h-4 mr-1" />

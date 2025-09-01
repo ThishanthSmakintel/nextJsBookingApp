@@ -50,9 +50,33 @@ export default function RealTimePermissionManager() {
       })
 
       if (response.ok) {
-        alert('Permissions updated! User will see changes instantly.')
+        // Show success toast
+        const toast = document.createElement('div')
+        toast.className = 'toast toast-top toast-center'
+        toast.innerHTML = `
+          <div class="alert alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Permissions updated! User will be notified instantly.</span>
+          </div>
+        `
+        document.body.appendChild(toast)
+        setTimeout(() => document.body.removeChild(toast), 3000)
       } else {
-        alert('Failed to update permissions')
+        // Show error toast
+        const toast = document.createElement('div')
+        toast.className = 'toast toast-top toast-center'
+        toast.innerHTML = `
+          <div class="alert alert-error">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Failed to update permissions</span>
+          </div>
+        `
+        document.body.appendChild(toast)
+        setTimeout(() => document.body.removeChild(toast), 3000)
       }
     } catch (error) {
       console.error('Permission update error:', error)

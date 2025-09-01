@@ -1,43 +1,43 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import StatsCard from '@/components/admin/StatsCard';
-import { BarChart3, Download, Calendar, TrendingUp, Users, Car, DollarSign } from 'lucide-react';
+'use client'
+import { useState, useEffect } from 'react'
+import StatsCard from '@/components/admin/StatsCard'
+import PermissionButton from '@/components/PermissionButton'
+import { BarChart3, Download, Calendar, TrendingUp, Users, Car, DollarSign } from 'lucide-react'
 
 export default function ReportsPage() {
-  const [reportData, setReportData] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState('7');
+  const [reportData, setReportData] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [dateRange, setDateRange] = useState('7')
 
   const handleExport = async () => {
     try {
-      const response = await fetch(`/api/admin/reports/export?range=${dateRange}`);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `report-${dateRange}days.csv`;
-      a.click();
+      const response = await fetch(`/api/admin/reports/export?range=${dateRange}`)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `report-${dateRange}days.csv`
+      a.click()
     } catch (error) {
-      console.error('Error exporting report:', error);
+      console.error('Error exporting report:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    fetchReportData();
-  }, []);
+    fetchReportData()
+  }, [])
 
   const fetchReportData = async () => {
     try {
-      const response = await fetch('/api/admin/reports');
-      const data = await response.json();
-      setReportData(data);
+      const response = await fetch('/api/admin/reports')
+      const data = await response.json()
+      setReportData(data)
     } catch (error) {
-      console.error('Error fetching report data:', error);
+      console.error('Error fetching report data:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -50,7 +50,7 @@ export default function ReportsPage() {
           <div className="text-sm text-base-content/70 animate-pulse">Loading...</div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -70,10 +70,15 @@ export default function ReportsPage() {
             <option value="90">Last 3 months</option>
             <option value="365">Last year</option>
           </select>
-          <button className="btn btn-primary" onClick={handleExport}>
+          <PermissionButton 
+            resource="reports" 
+            action="read"
+            className="btn btn-primary"
+            onClick={handleExport}
+          >
             <Download className="w-4 h-4" />
             Export
-          </button>
+          </PermissionButton>
         </div>
       </div>
 
@@ -146,5 +151,5 @@ export default function ReportsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

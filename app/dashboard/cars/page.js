@@ -6,6 +6,8 @@ import SearchableSelect from '@/components/SearchableSelect';
 import { useToast, useConfirm } from '@/components/Toast';
 import { Plus, Car, Edit, Trash2 } from 'lucide-react';
 import { currencies, formatCurrency } from '@/lib/currency';
+import PermissionButton from '@/components/PermissionButton';
+import PermissionWrapper from '@/components/PermissionWrapper';
 
 export default function CarsPage() {
   const [cars, setCars] = useState([]);
@@ -94,12 +96,22 @@ export default function CarsPage() {
       label: 'Actions',
       render: (_, car) => (
         <div className="flex gap-2">
-          <button className="btn btn-sm btn-ghost" onClick={() => handleEditCar(car)}>
+          <PermissionButton 
+            resource="cars" 
+            action="update"
+            className="btn btn-sm btn-ghost"
+            onClick={() => handleEditCar(car)}
+          >
             <Edit className="w-4 h-4" />
-          </button>
-          <button className="btn btn-sm btn-ghost text-error" onClick={() => handleDeleteCar(car.id)}>
+          </PermissionButton>
+          <PermissionButton 
+            resource="cars" 
+            action="delete"
+            className="btn btn-sm btn-ghost text-error"
+            onClick={() => handleDeleteCar(car.id)}
+          >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </PermissionButton>
         </div>
       )
     }
@@ -129,10 +141,15 @@ export default function CarsPage() {
           </h1>
           <p className="text-base-content/70 mt-1">Manage your fleet of vehicles</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <PermissionButton 
+          resource="cars" 
+          action="create"
+          className="btn btn-primary"
+          onClick={() => setShowModal(true)}
+        >
           <Plus className="w-4 h-4" />
           Add Car
-        </button>
+        </PermissionButton>
       </div>
 
       <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div></div>}>
@@ -144,8 +161,9 @@ export default function CarsPage() {
       </Suspense>
 
       {showModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
+        <PermissionWrapper resource="cars" action={editingCar ? 'update' : 'create'}>
+          <div className="modal modal-open">
+            <div className="modal-box">
             <h3 className="font-bold text-lg">{editingCar ? 'Edit Car' : 'Add New Car'}</h3>
             <form onSubmit={async (e) => {
               e.preventDefault();
@@ -248,8 +266,9 @@ export default function CarsPage() {
                 <button type="submit" className="btn btn-primary">{editingCar ? 'Update' : 'Add'} Car</button>
               </div>
             </form>
+            </div>
           </div>
-        </div>
+        </PermissionWrapper>
       )}
     </div>
   );

@@ -26,8 +26,11 @@
     "setup:rbac-demo": "node scripts/setup-rbac-demo.js",
     "list:users": "node scripts/list-users.js",
     "cleanup:test-users": "node scripts/cleanup-test-users.js",
+    "assign:staff-permissions": "node scripts/assign-staff-permissions.js",
+    "assign:driver-permissions": "node scripts/assign-driver-permissions.js",
     "workers:all": "concurrently \"npm run worker:notifications\" \"npm run worker:driver\" \"npm run worker:admin\" \"npm run worker:analytics\" \"npm run worker:cleanup\"",
-    "demo:rbac": "echo 'Visit http://localhost:3000/rbac-demo to see real-time RBAC in action'"
+    "demo:rbac": "echo 'Visit http://localhost:3000/rbac-demo to see real-time RBAC in action'",
+    "cache:clear": "rmdir /s /q .next 2>nul & npm run build"
   },
   "dependencies": {
     "@casl/ability": "^6.7.3",

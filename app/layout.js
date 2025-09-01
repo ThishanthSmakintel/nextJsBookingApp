@@ -8,7 +8,9 @@ import Sidebar from '@/components/Sidebar'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LocaleProvider } from '@/contexts/LocaleContext'
+import { SocketProvider } from '@/contexts/SocketContext'
 import { RealTimePermissionProvider } from '@/contexts/RealTimePermissionContext'
+import PermissionNotification from '@/components/PermissionNotification'
 
 export default function RootLayout({ children }) {
   const pathname = usePathname()
@@ -68,7 +70,8 @@ export default function RootLayout({ children }) {
         <ThemeProvider>
           <LocaleProvider>
             <AuthProvider>
-              <RealTimePermissionProvider>
+              <SocketProvider>
+                <RealTimePermissionProvider>
               {isDashboardRoute ? (
                 children
               ) : (
@@ -81,6 +84,7 @@ export default function RootLayout({ children }) {
                         {children}
                       </Suspense>
                     </main>
+                    <PermissionNotification />
                   </div>
                   <div className="drawer-side">
                     <label htmlFor="drawer-toggle" className="drawer-overlay"></label>
@@ -88,7 +92,8 @@ export default function RootLayout({ children }) {
                   </div>
                 </div>
               )}
-              </RealTimePermissionProvider>
+                </RealTimePermissionProvider>
+              </SocketProvider>
             </AuthProvider>
           </LocaleProvider>
         </ThemeProvider>

@@ -2,7 +2,7 @@
 import { useAbility } from '@/contexts/AbilityContext'
 
 export function usePermissions() {
-  const { ability, permissions, loading, user } = useAbility()
+  const { ability, permissions, loading, user, lastUpdate, refreshPermissions } = useAbility()
 
   const can = (action, subject) => {
     try {
@@ -37,6 +37,8 @@ export function usePermissions() {
     hasPermission, 
     permissions, 
     loading, 
-    role: user?.role 
+    role: user?.role,
+    lastUpdate,
+    refreshPermissions
   }
 }

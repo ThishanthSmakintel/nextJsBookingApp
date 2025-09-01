@@ -1,23 +1,23 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRealTimePermissions } from '@/contexts/RealTimePermissionContext'
+import { useAbility } from '@/contexts/AbilityContext'
 
 export function PermissionButton({ action, subject, children, className = '', ...props }) {
-  const { can } = useRealTimePermissions()
+  const { ability, version } = useAbility()
   const [isEnabled, setIsEnabled] = useState(false)
 
   useEffect(() => {
-    setIsEnabled(can(action, subject))
-  }, [can, action, subject])
+    setIsEnabled(ability.can(action, subject))
+  }, [ability, action, subject, version])
 
   useEffect(() => {
     const handlePermissionUpdate = () => {
-      setIsEnabled(can(action, subject))
+      setIsEnabled(ability.can(action, subject))
     }
 
-    window.addEventListener('permissions-updated', handlePermissionUpdate)
-    return () => window.removeEventListener('permissions-updated', handlePermissionUpdate)
-  }, [can, action, subject])
+    window.addEventListener('permissions-changed', handlePermissionUpdate)
+    return () => window.removeEventListener('permissions-changed', handlePermissionUpdate)
+  }, [ability, action, subject])
 
   if (!isEnabled) {
     return (
@@ -40,21 +40,21 @@ export function PermissionButton({ action, subject, children, className = '', ..
 }
 
 export function PermissionForm({ action, subject, children, className = '' }) {
-  const { can } = useRealTimePermissions()
+  const { ability, version } = useAbility()
   const [isReadOnly, setIsReadOnly] = useState(true)
 
   useEffect(() => {
-    setIsReadOnly(!can(action, subject))
-  }, [can, action, subject])
+    setIsReadOnly(!ability.can(action, subject))
+  }, [ability, action, subject, version])
 
   useEffect(() => {
     const handlePermissionUpdate = () => {
-      setIsReadOnly(!can(action, subject))
+      setIsReadOnly(!ability.can(action, subject))
     }
 
-    window.addEventListener('permissions-updated', handlePermissionUpdate)
-    return () => window.removeEventListener('permissions-updated', handlePermissionUpdate)
-  }, [can, action, subject])
+    window.addEventListener('permissions-changed', handlePermissionUpdate)
+    return () => window.removeEventListener('permissions-changed', handlePermissionUpdate)
+  }, [ability, action, subject])
 
   return (
     <div className={`${className} ${isReadOnly ? 'pointer-events-none opacity-60' : ''}`}>
@@ -73,21 +73,21 @@ export function PermissionForm({ action, subject, children, className = '' }) {
 }
 
 export function PermissionSection({ action, subject, children, fallback = null }) {
-  const { can } = useRealTimePermissions()
+  const { ability, version } = useAbility()
   const [hasAccess, setHasAccess] = useState(false)
 
   useEffect(() => {
-    setHasAccess(can(action, subject))
-  }, [can, action, subject])
+    setHasAccess(ability.can(action, subject))
+  }, [ability, action, subject, version])
 
   useEffect(() => {
     const handlePermissionUpdate = () => {
-      setHasAccess(can(action, subject))
+      setHasAccess(ability.can(action, subject))
     }
 
-    window.addEventListener('permissions-updated', handlePermissionUpdate)
-    return () => window.removeEventListener('permissions-updated', handlePermissionUpdate)
-  }, [can, action, subject])
+    window.addEventListener('permissions-changed', handlePermissionUpdate)
+    return () => window.removeEventListener('permissions-changed', handlePermissionUpdate)
+  }, [ability, action, subject])
 
   if (!hasAccess) {
     return fallback

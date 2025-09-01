@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { Calendar, Plus, Edit, Trash2 } from 'lucide-react'
 import DataTable from '@/components/admin/DataTable'
 import SearchableSelect from '@/components/SearchableSelect'
+import PermissionButton from '@/components/PermissionButton'
+import PermissionWrapper from '@/components/PermissionWrapper'
 import { useToast, useConfirm } from '@/components/Toast'
 import { useCurrency } from '@/contexts/CurrencyContext'
 import { currencies, formatCurrency } from '@/lib/currency'
@@ -103,10 +105,15 @@ export default function BookingsPage() {
           </h1>
           <p className="text-base-content/70 mt-1">Manage all bookings and reservations</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <PermissionButton 
+          resource="bookings" 
+          action="create"
+          className="btn btn-primary"
+          onClick={() => setShowModal(true)}
+        >
           <Plus className="w-4 h-4" />
           Add Booking
-        </button>
+        </PermissionButton>
       </div>
 
       <DataTable
@@ -146,11 +153,18 @@ export default function BookingsPage() {
                   placeholder="Status"
                   className="w-24"
                 />
-                <button className="btn btn-sm btn-ghost" onClick={() => handleEditBooking(booking)}>
+                <PermissionButton 
+                  resource="bookings" 
+                  action="update"
+                  className="btn btn-sm btn-ghost"
+                  onClick={() => handleEditBooking(booking)}
+                >
                   <Edit className="w-4 h-4" />
-                </button>
-                <button 
-                  className="btn btn-sm btn-ghost text-error" 
+                </PermissionButton>
+                <PermissionButton 
+                  resource="bookings" 
+                  action="delete"
+                  className="btn btn-sm btn-ghost text-error"
                   onClick={() => handleDeleteBooking(booking.id)}
                   disabled={deleting === booking.id}
                 >
@@ -159,7 +173,7 @@ export default function BookingsPage() {
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
-                </button>
+                </PermissionButton>
               </div>
             )
           }
@@ -168,8 +182,9 @@ export default function BookingsPage() {
       />
 
       {showModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
+        <PermissionWrapper resource="bookings" action={editingBooking ? 'update' : 'create'}>
+          <div className="modal modal-open">
+            <div className="modal-box">
             <h3 className="font-bold text-lg">{editingBooking ? 'Edit Booking' : 'Add Booking'}</h3>
             <form onSubmit={async (e) => {
               e.preventDefault()
@@ -211,8 +226,9 @@ export default function BookingsPage() {
                 <button type="submit" className="btn btn-primary">{editingBooking ? 'Update' : 'Add'} Booking</button>
               </div>
             </form>
+            </div>
           </div>
-        </div>
+        </PermissionWrapper>
       )}
     </div>
   )

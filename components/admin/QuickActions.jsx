@@ -1,6 +1,6 @@
 'use client'
-import Link from 'next/link'
-import { Plus, Download, Upload, RefreshCw } from 'lucide-react'
+import PermissionButton from '@/components/PermissionButton'
+import { Plus, Download } from 'lucide-react'
 
 export default function QuickActions() {
   return (
@@ -8,24 +8,59 @@ export default function QuickActions() {
       <div className="card-body">
         <h3 className="card-title">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-2">
-          <Link href="/admin/cars" className="btn btn-primary btn-sm">
+          <PermissionButton 
+            resource="cars" 
+            action="create"
+            className="btn btn-primary btn-sm"
+            onClick={() => window.location.href = '/dashboard/cars'}
+          >
             <Plus size={16} /> Add Car
-          </Link>
-          <Link href="/admin/drivers" className="btn btn-secondary btn-sm">
+          </PermissionButton>
+          
+          <PermissionButton 
+            resource="drivers" 
+            action="create"
+            className="btn btn-secondary btn-sm"
+            onClick={() => window.location.href = '/dashboard/drivers'}
+          >
             <Plus size={16} /> Add Driver
-          </Link>
-          <Link href="/admin/staff" className="btn btn-accent btn-sm">
+          </PermissionButton>
+          
+          <PermissionButton 
+            resource="staff" 
+            action="create"
+            className="btn btn-accent btn-sm"
+            onClick={() => window.location.href = '/dashboard/staff'}
+          >
             <Plus size={16} /> Add Staff
-          </Link>
-          <Link href="/admin/bookings" className="btn btn-info btn-sm">
+          </PermissionButton>
+          
+          <PermissionButton 
+            resource="bookings" 
+            action="create"
+            className="btn btn-info btn-sm"
+            onClick={() => window.location.href = '/dashboard/create-booking'}
+          >
             <Plus size={16} /> New Booking
-          </Link>
-          <Link href="/admin/customers" className="btn btn-warning btn-sm">
+          </PermissionButton>
+          
+          <PermissionButton 
+            resource="customers" 
+            action="create"
+            className="btn btn-warning btn-sm"
+            onClick={() => window.location.href = '/dashboard/customers'}
+          >
             <Plus size={16} /> Add Customer
-          </Link>
-          <Link href="/admin/reports" className="btn btn-outline btn-sm">
+          </PermissionButton>
+          
+          <PermissionButton 
+            resource="reports" 
+            action="read"
+            className="btn btn-outline btn-sm"
+            onClick={() => window.location.href = '/dashboard/reports'}
+          >
             <Download size={16} /> Reports
-          </Link>
+          </PermissionButton>
         </div>
       </div>
     </div>

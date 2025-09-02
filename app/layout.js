@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LocaleProvider } from '@/contexts/LocaleContext'
 import { SocketProvider } from '@/contexts/SocketContext'
 import { RealTimePermissionProvider } from '@/contexts/RealTimePermissionContext'
+import { ToastProvider } from '@/components/Toast'
 import PermissionNotification from '@/components/PermissionNotification'
 
 export default function RootLayout({ children }) {
@@ -72,6 +73,7 @@ export default function RootLayout({ children }) {
             <AuthProvider>
               <SocketProvider>
                 <RealTimePermissionProvider>
+                  <ToastProvider>
               {isDashboardRoute ? (
                 children
               ) : (
@@ -92,6 +94,7 @@ export default function RootLayout({ children }) {
                   </div>
                 </div>
               )}
+                  </ToastProvider>
                 </RealTimePermissionProvider>
               </SocketProvider>
             </AuthProvider>

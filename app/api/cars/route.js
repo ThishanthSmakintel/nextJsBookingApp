@@ -8,6 +8,8 @@ export async function GET(request) {
     const location = searchParams.get('location')
     const category = searchParams.get('category')
     
+
+    
     const cacheKey = `cars:${location || 'all'}:${category || 'all'}`
     const cached = await cacheGet(cacheKey)
     
@@ -15,28 +17,11 @@ export async function GET(request) {
       return NextResponse.json(cached)
     }
     
-    const whereClause = {
-      isActive: true
-    }
-    
-    if (location) {
-      whereClause.location = {
-        name: {
-          contains: location,
-          mode: 'insensitive'
-        }
-      }
-    }
-    
-    if (category) {
-      whereClause.category = {
-        contains: category,
-        mode: 'insensitive'
-      }
-    }
-    
+    // Get all active cars first
     const cars = await prisma.car.findMany({
-      where: whereClause,
+      where: {
+        isActive: true
+      },
       include: {
         location: true
       },
@@ -45,9 +30,30 @@ export async function GET(request) {
       }
     })
     
-    await cacheSet(cacheKey, cars, 300)
+    // Filter by location if specified
+    let filteredCars = cars
+    if (location) {
+      filteredCars = cars.filter(car => 
+        car.location?.city?.toLowerCase().includes(location.toLowerCase())
+      )
+    }
     
-    return NextResponse.json(cars)
+    // Filter by category if specified
+    if (category) {
+      filteredCars = filteredCars.filter(car => 
+        car.category?.toLowerCase().includes(category.toLowerCase())
+      )
+    }
+    
+    // Return filtered cars or all cars if no matches
+    const finalCars = filteredCars.length > 0 ? filteredCars : cars
+    
+    console.log('🚗 Found cars:', cars.length)
+    console.log('🚗 Cars data:', cars)
+    
+    await cacheSet(cacheKey, finalCars, 300)
+    
+    return NextResponse.json(finalCars)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch cars' }, { status: 500 })
   }

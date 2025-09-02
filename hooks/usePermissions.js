@@ -27,6 +27,7 @@ export function usePermissions() {
   const hasPermission = (resource, action) => {
     if (!user) return false
     if (user.role === 'ADMIN') return true
+    if (!permissions || !Array.isArray(permissions)) return false
     return permissions.includes(`${resource}:${action}`)
   }
 

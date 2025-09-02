@@ -28,13 +28,19 @@ model Car {
   year         Int
   licensePlate String    @unique
   pricePerHour Float
+  dailyRate    Float     @default(50)
+  kmRate       Float     @default(0.5)
   currency     String    @default("USD")
   status       String    @default("available")
+  category     String    @default("economy")
+  capacity     Int       @default(5)
+  locationId   String?
   image        String?
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())
   bookings     Booking[]
   maintenances Maintenance[]
+  location     Location? @relation(fields: [locationId], references: [id])
 }
 
 model Location {
@@ -45,23 +51,31 @@ model Location {
   availableCars Int     @default(0)
   status        String  @default("active")
   createdAt     DateTime @default(now())
+  cars          Car[]
 }
 
 model Booking {
-  id         String   @id @default(cuid())
-  customerId String
-  carId      String
-  driverId   String?
-  startTime  DateTime
-  endTime    DateTime
-  status     String   @default("PENDING")
-  totalPrice Float
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(cuid())
+  customerId   String
+  carId        String
+  driverId     String?
+  startTime    DateTime
+  endTime      DateTime
+  status       String   @default("PENDING")
+  totalPrice   Float
+  pricingMode  String   @default("daily")
+  estimatedKm  Int      @default(0)
+  driverPrice  Float    @default(0)
+  withDriver   Boolean  @default(false)
+  paymentType  String   @default("PAY_LATER") // PAY_NOW or PAY_LATER
+  paymentStatus String  @default("PENDING") // PENDING, PAID, FAILED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   
-  customer   User     @relation(fields: [customerId], references: [id])
-  car        Car      @relation(fields: [carId], references: [id])
-  driver     Driver?  @relation(fields: [driverId], references: [id])
+  customer     User     @relation(fields: [customerId], references: [id])
+  car          Car      @relation(fields: [carId], references: [id])
+  driver       Driver?  @relation(fields: [driverId], references: [id])
+  payments     Payment[]
 }
 
 model Driver {
@@ -143,4 +157,16 @@ model Maintenance {
   car         Car      @relation(fields: [carId], references: [id])
   
   @@index([carId, startDate, endDate])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  bookingId   String
+  amount      Float
+  method      String   // CARD, CASH, BANK_TRANSFER
+  status      String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  paymentDate DateTime?
+  createdAt   DateTime @default(now())
+  
+  booking     Booking  @relation(fields: [bookingId], references: [id])
 }

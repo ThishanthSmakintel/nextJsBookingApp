@@ -6,7 +6,7 @@ import { createToken } from '@/lib/auth'
 
 export async function POST(request) {
   try {
-    const { email, otp } = await request.json()
+    const { email, otp, fullName } = await request.json()
     
     const isValid = await verifyOTP(email, otp)
     
@@ -14,35 +14,33 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid OTP' }, { status: 400 })
     }
     
-    const pendingData = await getPendingRegistration(email)
-    if (!pendingData) {
-      return NextResponse.json({ error: 'Registration data not found' }, { status: 400 })
+    if (!fullName) {
+      return NextResponse.json({ error: 'Full name is required' }, { status: 400 })
     }
     
-    const hashedPassword = await bcrypt.hash(pendingData.password, 12)
-    
-    const customer = await prisma.customer.create({
+    // Create user directly
+    const user = await prisma.user.create({
       data: {
-        userId: `cust_${Date.now()}`,
-        fullName: pendingData.fullName,
-        phone: pendingData.phone,
+        name: fullName,
         email,
-        password: hashedPassword
+        password: 'oauth_user', // No password for OTP users
+        role: 'CUSTOMER'
       }
     })
     
     const token = createToken({ 
-      id: customer.id, 
-      email: customer.email, 
-      role: 'customer' 
+      id: user.id, 
+      email: user.email, 
+      role: user.role 
     })
     
     return NextResponse.json({ 
       token, 
       user: { 
-        id: customer.id, 
-        fullName: customer.fullName, 
-        email: customer.email 
+        id: user.id, 
+        name: user.name, 
+        email: user.email,
+        role: user.role 
       } 
     })
   } catch (error) {

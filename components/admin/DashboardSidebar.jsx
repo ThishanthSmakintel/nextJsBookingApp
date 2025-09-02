@@ -3,6 +3,7 @@ import { memo, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { usePermissions } from '@/hooks/usePermissions'
+import { useAuth } from '@/contexts/AuthContext'
 import { useSidebar } from '@/app/dashboard/layout'
 import { 
   BarChart3, Calendar, Car, Users, UserCheck, MapPin, 
@@ -63,20 +64,20 @@ function DashboardSidebar() {
   const pathname = usePathname()
   const [openMenus, setOpenMenus] = useState({})
   const { hasPermission } = usePermissions()
+  const { user } = useAuth()
   const { sidebarOpen } = useSidebar()
 
   const toggleMenu = useCallback((label) => {
     setOpenMenus(prev => ({ ...prev, [label]: !prev[label] }))
   }, [])
 
-  // Get current user
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  // User is now from auth context
 
   const renderMenuItem = (item) => {
     const Icon = item.icon
     
     // Always show menu items, but indicate permission status
-    const hasAccess = !item.permission || user.role === 'ADMIN' || hasPermission(item.permission.resource, item.permission.action)
+    const hasAccess = !item.permission || user?.role === 'ADMIN' || hasPermission(item.permission.resource, item.permission.action)
     
     if (item.submenu) {
       const isOpen = openMenus[item.label]
@@ -98,7 +99,7 @@ function DashboardSidebar() {
             <ul>
               {item.submenu.map(subItem => {
                 // Check permissions for submenu items
-                const hasSubAccess = !subItem.permission || user.role === 'ADMIN' || hasPermission(subItem.permission.resource, subItem.permission.action)
+                const hasSubAccess = !subItem.permission || user?.role === 'ADMIN' || hasPermission(subItem.permission.resource, subItem.permission.action)
                 
                 const SubIcon = subItem.icon
                 return (

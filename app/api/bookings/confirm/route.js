@@ -10,33 +10,28 @@ export async function POST(request) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     const user = verifyToken(token)
     
-    const { lockId, carId, startTime, endTime, pricingMode, estimatedKm, withDriver } = await request.json()
+    const { lockId, carId, startTime, endTime, pricingMode, estimatedKm, withDriver, paymentType } = await request.json()
     
-    const customer = await prisma.customer.findUnique({
+    const customer = await prisma.user.findUnique({
       where: { id: user.id }
     })
     
     if (!customer) {
-      return NextResponse.json({ error: 'Customer not found', clearSession: true }, { status: 404 })
+      return NextResponse.json({ error: 'User not found', clearSession: true }, { status: 404 })
     }
     
     const car = await prisma.car.findUnique({
-      where: { id: carId },
-      include: { location: true }
+      where: { id: carId }
     })
     
     const hours = (new Date(endTime) - new Date(startTime)) / (1000 * 60 * 60)
     let carPrice = pricingMode === 'daily' 
-      ? Math.ceil(hours / 24) * car.dailyRate
-      : (estimatedKm || 0) * car.kmRate
+      ? Math.ceil(hours / 24) * (car.dailyRate || car.pricePerHour * 24)
+      : (estimatedKm || 0) * (car.kmRate || 0.5)
     
     let driverPrice = 0
-    if (withDriver && estimatedKm) {
-      const driverSetting = await prisma.settings.findUnique({
-        where: { key: 'driver_rate_per_km' }
-      })
-      const driverRate = driverSetting ? parseFloat(driverSetting.value) : 2.5
-      driverPrice = estimatedKm * driverRate
+    if (withDriver) {
+      driverPrice = 50 // Fixed daily rate
     }
     
     const totalPrice = carPrice + driverPrice
@@ -47,15 +42,21 @@ export async function POST(request) {
         customerId: customer.id,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
-        pricingMode,
-        estimatedKm,
         totalPrice,
+        pricingMode: pricingMode || 'daily',
+        estimatedKm: estimatedKm || 0,
         driverPrice,
         withDriver: withDriver || false,
+        paymentType: paymentType || 'PAY_LATER',
+        paymentStatus: paymentType === 'PAY_NOW' ? 'PENDING' : 'PENDING',
         status: 'PENDING'
       },
       include: {
-        car: { include: { location: true } },
+        car: {
+          include: {
+            location: true
+          }
+        },
         customer: true
       }
     })
@@ -72,7 +73,7 @@ export async function POST(request) {
     try {
       await sendBookingConfirmationEmail(customer.email, booking)
     } catch (emailError) {
-      console.error('Failed to send confirmation email:', emailError)
+      // Email sending failed silently
     }
     
     return NextResponse.json(booking)

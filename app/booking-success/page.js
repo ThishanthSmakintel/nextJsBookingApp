@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { format } from 'date-fns'
+import Breadcrumb from '@/components/Breadcrumb'
 
 export default function BookingSuccessPage() {
   const [booking, setBooking] = useState(null)
@@ -8,11 +10,20 @@ export default function BookingSuccessPage() {
 
   useEffect(() => {
     const bookingData = localStorage.getItem('confirmedBooking')
-    if (bookingData) {
-      setBooking(JSON.parse(bookingData))
-      localStorage.removeItem('confirmedBooking')
-    } else {
-      router.push('/dashboard')
+    if (!bookingData) {
+      router.push('/')
+      return
+    }
+    
+    try {
+      const booking = JSON.parse(bookingData)
+      if (!booking.id || !booking.startTime || !booking.endTime) {
+        router.push('/')
+        return
+      }
+      setBooking(booking)
+    } catch (error) {
+      router.push('/')
     }
   }, [router])
 
@@ -28,6 +39,12 @@ export default function BookingSuccessPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto">
+          <Breadcrumb items={[
+            { label: 'Search Cars', href: '/search' },
+            { label: 'Book Car' },
+            { label: 'Booking Confirmed' }
+          ]} />
+          
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,10 +76,17 @@ export default function BookingSuccessPage() {
                 <div>
                   <h3 className="font-semibold text-gray-800 mb-3">Booking Information</h3>
                   <div className="space-y-2">
-                    <p><span className="text-gray-600">Pickup:</span> {new Date(booking.startTime).toLocaleString()}</p>
-                    <p><span className="text-gray-600">Return:</span> {new Date(booking.endTime).toLocaleString()}</p>
-                    <p><span className="text-gray-600">Location:</span> {booking.car.location.name}</p>
+                    <p><span className="text-gray-600">Pickup:</span> {format(new Date(booking.startTime), 'dd/MM/yyyy HH:mm')}</p>
+                    <p><span className="text-gray-600">Return:</span> {format(new Date(booking.endTime), 'dd/MM/yyyy HH:mm')}</p>
+                    <p><span className="text-gray-600">Location:</span> {booking.car.location?.name || 'Main Location'}</p>
                     <p><span className="text-gray-600">Driver:</span> {booking.withDriver ? 'With Driver' : 'Self Drive'}</p>
+                    <p><span className="text-gray-600">Payment:</span> 
+                      <span className={`ml-2 px-2 py-1 rounded text-sm ${
+                        booking.paymentType === 'PAY_NOW' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {booking.paymentType === 'PAY_NOW' ? 'Paid Online' : 'Pay Later'}
+                      </span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -76,20 +100,57 @@ export default function BookingSuccessPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all"
-            >
-              View Dashboard
-            </button>
-            <button 
-              onClick={() => router.push('/bookings')}
-              className="flex-1 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-4 px-6 rounded-xl transition-all"
-            >
-              View All Bookings
-            </button>
-          </div>
+          {booking.paymentType === 'PAY_NOW' && booking.paymentStatus === 'PENDING' ? (
+            <div className="flex flex-col gap-4">
+              <button 
+                onClick={() => router.push(`/payment?bookingId=${booking.id}`)}
+                className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all"
+              >
+                Complete Payment - ${booking.totalPrice}
+              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button 
+                  onClick={() => router.push('/')}
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                >
+                  Return Home
+                </button>
+                <button 
+                  onClick={() => router.push('/bookings')}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all"
+                >
+                  View All Bookings
+                </button>
+                <button 
+                  onClick={() => router.push('/search')}
+                  className="bg-white border-2 border-gray-500 text-gray-700 hover:bg-gray-50 font-bold py-3 px-6 rounded-xl transition-all"
+                >
+                  Book Another Car
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <button 
+                onClick={() => router.push('/')}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all"
+              >
+                Return Home
+              </button>
+              <button 
+                onClick={() => router.push('/bookings')}
+                className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-xl transition-all"
+              >
+                View All Bookings
+              </button>
+              <button 
+                onClick={() => router.push('/search')}
+                className="bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-bold py-4 px-6 rounded-xl transition-all"
+              >
+                Book Another Car
+              </button>
+            </div>
+          )}
           
           <div className="text-center mt-6">
             <p className="text-gray-600">A confirmation email has been sent to your email address.</p>

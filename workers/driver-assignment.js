@@ -11,15 +11,6 @@ const assignDriver = async (booking) => {
   const availableDrivers = await prisma.driver.findMany({
     where: {
       active: true,
-      currentCarId: booking.carId,
-      schedules: {
-        some: {
-          dayOfWeek,
-          isActive: true,
-          startTime: { lte: timeStr },
-          endTime: { gte: timeStr }
-        }
-      },
       bookings: {
         none: {
           startTime: { lte: booking.endTime },
@@ -27,8 +18,7 @@ const assignDriver = async (booking) => {
           status: { in: ['PENDING', 'CONFIRMED'] }
         }
       }
-    },
-    include: { schedules: true }
+    }
   })
 
   if (availableDrivers.length > 0) {

@@ -7,21 +7,20 @@ export async function GET(request) {
     const token = request.headers.get('authorization')?.replace('Bearer ', '')
     const user = verifyToken(token)
     
-    const customer = await prisma.customer.findUnique({
-      where: { email: user.email }
-    })
-    
-    if (!customer) {
-      return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
-    }
-    
     const bookings = await prisma.booking.findMany({
-      where: { customerId: customer.id },
-      include: {
-        car: { include: { location: true } },
-        driver: true
+      where: {
+        customerId: user.id
       },
-      orderBy: { createdAt: 'desc' }
+      include: {
+        car: {
+          include: {
+            location: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     })
     
     return NextResponse.json(bookings)

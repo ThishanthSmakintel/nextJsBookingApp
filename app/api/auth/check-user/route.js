@@ -5,7 +5,7 @@ export async function POST(request) {
   try {
     const { email } = await request.json()
     
-    const user = await prisma.customer.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email },
       select: { id: true, name: true, email: true }
     })

@@ -12,14 +12,17 @@ export async function POST(request) {
     const { carId, startTime, endTime } = await request.json()
     const lockId = uuidv4()
     
+    const lockStartTime = Date.now()
     const locked = await lockCar(carId, lockId, 600) // 10 minutes
     
     if (locked) {
+      const expiresAt = new Date(lockStartTime + 600000).toISOString()
+      
       await emitEvent(EVENTS.CAR_LOCKED, { carId, lockId, userId: user.id })
       
       return NextResponse.json({ 
         lockId, 
-        expiresAt: new Date(Date.now() + 600000).toISOString() 
+        expiresAt 
       })
     } else {
       return NextResponse.json({ error: 'Car is not available' }, { status: 409 })

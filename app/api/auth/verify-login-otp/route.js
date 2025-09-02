@@ -13,30 +13,27 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid OTP' }, { status: 400 })
     }
     
-    const customer = await prisma.customer.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email }
     })
     
-    if (!customer) {
+    if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
     
-    // Determine role based on email (admin@carbook.com is admin)
-    const role = email === 'admin@carbook.com' ? 'admin' : 'customer'
-    
     const token = createToken({ 
-      id: customer.id, 
-      email: customer.email, 
-      role 
+      id: user.id, 
+      email: user.email, 
+      role: user.role 
     })
     
     return NextResponse.json({ 
       token, 
       user: { 
-        id: customer.id, 
-        fullName: customer.fullName, 
-        email: customer.email,
-        role 
+        id: user.id, 
+        name: user.name, 
+        email: user.email,
+        role: user.role 
       } 
     })
   } catch (error) {

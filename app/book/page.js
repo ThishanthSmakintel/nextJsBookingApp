@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import BookingForm from '@/components/BookingForm'
 import { useToast } from '@/components/Toast'
+import Breadcrumb from '@/components/Breadcrumb'
 
 export default function BookPage() {
   const [car, setCar] = useState(null)
@@ -11,6 +12,47 @@ export default function BookPage() {
   const toast = useToast()
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const startDate = urlParams.get('startDate')
+    const endDate = urlParams.get('endDate')
+    
+    // Validate dates
+    if (!startDate || !endDate || startDate === 'null' || endDate === 'null') {
+      router.push('/')
+      return
+    }
+    
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const now = new Date()
+    
+    // Check if dates are valid
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      router.push('/')
+      return
+    }
+    
+    // Check if start date is in the past (more than 1 day ago)
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (start < yesterday) {
+      router.push('/')
+      return
+    }
+    
+    // Check if end date is before start date
+    if (end <= start) {
+      router.push('/')
+      return
+    }
+    
+    // Check if booking is more than 14 days
+    const daysDiff = (end - start) / (1000 * 60 * 60 * 24)
+    if (daysDiff > 14) {
+      router.push('/')
+      return
+    }
+    
     const selectedCar = localStorage.getItem('selectedCar')
     const storedLockData = localStorage.getItem('lockData')
     
@@ -42,6 +84,8 @@ export default function BookPage() {
         localStorage.removeItem('selectedCar')
         localStorage.removeItem('lockData')
         localStorage.setItem('confirmedBooking', JSON.stringify(booking))
+        
+        // Always go to success page first, then payment if needed
         router.push('/booking-success')
       } else {
         if (booking.clearSession) {
@@ -70,6 +114,11 @@ export default function BookPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
+        <Breadcrumb items={[
+          { label: 'Search Cars', href: '/search' },
+          { label: 'Book Car' }
+        ]} />
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">Complete Your Booking</h1>
@@ -125,7 +174,7 @@ export default function BookPage() {
                       </div>
                       <span className="text-gray-600">Location</span>
                     </div>
-                    <span className="font-semibold">{car.location.name}</span>
+                    <span className="font-semibold">{car.location?.name || 'Main Location'}</span>
                   </div>
                   
                   <div className="bg-gray-50 rounded-xl p-4 mt-6">

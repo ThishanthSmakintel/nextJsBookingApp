@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MapPin, Car, Calendar, Search, Zap, UserCheck, Smartphone, Shield, Clock, Star, Users, Award, CheckCircle } from 'lucide-react'
 import { useLocale } from '@/contexts/LocaleContext'
+import { useToast } from '@/components/Toast'
 
 export default function HomePage() {
   const [searchData, setSearchData] = useState({
@@ -11,11 +12,40 @@ export default function HomePage() {
     endDate: '',
     category: ''
   })
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
   const { t } = useLocale()
+  const toast = useToast()
 
   const handleSearch = (e) => {
     e.preventDefault()
+    
+    if (!searchData.startDate || !searchData.endDate) {
+      toast.error('Please select both pickup and return dates')
+      return
+    }
+    
+    const start = new Date(searchData.startDate)
+    const end = new Date(searchData.endDate)
+    const now = new Date()
+    
+    if (start < now) {
+      toast.error('Pickup date cannot be in the past')
+      return
+    }
+    
+    if (end <= start) {
+      toast.error('Return date must be after pickup date')
+      return
+    }
+    
+    const daysDiff = (end - start) / (1000 * 60 * 60 * 24)
+    if (daysDiff > 14) {
+      toast.error('Maximum booking duration is 14 days')
+      return
+    }
+    
+    setLoading(true)
     const params = new URLSearchParams(searchData)
     router.push(`/search?${params}`)
   }
@@ -112,9 +142,18 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  <button type="submit" className="btn btn-primary btn-lg w-full mt-6">
-                    <Search className="w-5 h-5 mr-2" />
-                    {t('searchCars')}
+                  <button type="submit" className="btn btn-primary btn-lg w-full mt-6" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm mr-2"></span>
+                        Please wait...
+                      </>
+                    ) : (
+                      <>
+                        <Search className="w-5 h-5 mr-2" />
+                        {t('searchCars')}
+                      </>
+                    )}
                   </button>
                 </form>
               </div>

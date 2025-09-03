@@ -115,7 +115,12 @@ export default function BookingForm({ car, lockData, onConfirm }) {
           </div>
           <CountdownTimer 
             expiresAt={lockData.expiresAt} 
-            onExpire={() => window.location.reload()} 
+            onExpire={() => {
+              // Clear booking data and redirect to search
+              localStorage.removeItem('selectedCar')
+              localStorage.removeItem('lockData')
+              window.location.href = '/search'
+            }} 
           />
         </div>
       </div>
@@ -430,8 +435,8 @@ export default function BookingForm({ car, lockData, onConfirm }) {
               localStorage.removeItem('selectedCar')
               localStorage.removeItem('lockData')
               
-              // Go back to search page
-              window.history.back()
+              // Navigate to search page
+              window.location.href = '/search'
             })}
             className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-all"
           >

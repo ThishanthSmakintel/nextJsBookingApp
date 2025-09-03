@@ -50,15 +50,6 @@ export default function BookingsPage() {
     }
   }
 
-  const getPaymentStatusColor = (status) => {
-    switch (status) {
-      case 'PAID': return 'badge-success'
-      case 'PENDING': return 'badge-warning'
-      case 'FAILED': return 'badge-error'
-      default: return 'badge-neutral'
-    }
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -117,11 +108,6 @@ export default function BookingsPage() {
                     <div className={`badge badge-lg ${getStatusColor(booking.status)}`}>
                       {booking.status}
                     </div>
-                    {booking.paymentType === 'PAY_NOW' && (
-                      <div className={`badge badge-lg ${getPaymentStatusColor(booking.paymentStatus)}`}>
-                        {booking.paymentStatus}
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -133,7 +119,7 @@ export default function BookingsPage() {
                     <div>
                       <p className="text-xs text-gray-500">Duration</p>
                       <p className="font-medium">
-                        {format(new Date(booking.startTime), 'dd/MM/yyyy')} - {format(new Date(booking.endTime), 'dd/MM/yyyy')}
+                        {booking.startTime ? format(new Date(booking.startTime), 'dd/MM/yyyy') : 'N/A'} - {booking.endTime ? format(new Date(booking.endTime), 'dd/MM/yyyy') : 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -143,7 +129,7 @@ export default function BookingsPage() {
                     <div>
                       <p className="text-xs text-gray-500">Time</p>
                       <p className="font-medium">
-                        {format(new Date(booking.startTime), 'HH:mm')}
+                        {booking.startTime ? format(new Date(booking.startTime), 'HH:mm') : 'N/A'}
                       </p>
                     </div>
                   </div>
@@ -161,14 +147,13 @@ export default function BookingsPage() {
                     <div>
                       <p className="text-xs text-gray-500">Total</p>
                       <p className="font-bold text-lg text-green-600">${booking.totalPrice}</p>
-                      <p className="text-xs text-gray-500">{booking.paymentType === 'PAY_NOW' ? 'Online Payment' : 'Pay Later'}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex justify-between items-center mt-4 pt-4 border-t">
                   <div className="text-sm text-gray-500">
-                    Booked on {format(new Date(booking.createdAt), 'dd/MM/yyyy')}
+                    Booked on {booking.createdAt ? format(new Date(booking.createdAt), 'dd/MM/yyyy') : 'N/A'}
                   </div>
                   <div className="text-sm font-medium">
                     Booking ID: {booking.id.slice(-8).toUpperCase()}

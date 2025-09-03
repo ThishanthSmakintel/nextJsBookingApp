@@ -1,10 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Calendar, Clock, MapPin, User } from 'lucide-react'
+import { Calendar, Clock, MapPin, User, CreditCard } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
+import { format } from 'date-fns'
 
 export default function MyBookings() {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
 
   useEffect(() => {
     fetchMyBookings()
@@ -50,10 +53,14 @@ export default function MyBookings() {
                     <h3 className="font-semibold">{booking.car?.make} {booking.car?.model}</h3>
                     <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                       <User className="w-4 h-4" />
-                      {booking.customer?.fullName}
+                      {booking.customer?.fullName || booking.customer?.name}
                     </div>
                   </div>
-                  <div className={`badge ${booking.status === 'CONFIRMED' ? 'badge-success' : 'badge-warning'}`}>
+                  <div className={`badge ${
+                    booking.status === 'CONFIRMED' ? 'badge-success' :
+                    booking.status === 'PENDING' ? 'badge-warning' :
+                    booking.status === 'CANCELLED' ? 'badge-error' : 'badge-info'
+                  }`}>
                     {booking.status}
                   </div>
                 </div>
@@ -61,11 +68,11 @@ export default function MyBookings() {
                 <div className="flex items-center gap-4 mt-2 text-sm">
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    {new Date(booking.startTime).toLocaleString()}
+                    {format(new Date(booking.startTime), 'dd/MM/yyyy HH:mm')}
                   </div>
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    {booking.pickupLocation}
+                    {booking.car?.location?.name || 'Main Location'}
                   </div>
                 </div>
               </div>

@@ -21,80 +21,58 @@ async function main() {
     }
   })
 
-  // Create dummy cars
-  const cars = [
-    {
-      make: 'Toyota',
-      model: 'Prius',
-      year: 2022,
-      licensePlate: 'CAR-001',
-      pricePerHour: 50,
-      dailyRate: 50,
-      kmRate: 0.5,
-      category: 'economy',
-      capacity: 5,
-      locationId: location1.id
-    },
-    {
-      make: 'Honda',
-      model: 'Civic',
-      year: 2023,
-      licensePlate: 'CAR-002', 
-      pricePerHour: 60,
-      dailyRate: 60,
-      kmRate: 0.6,
-      category: 'economy',
-      capacity: 5,
-      locationId: location1.id
-    },
-    {
-      make: 'BMW',
-      model: 'X5',
-      year: 2023,
-      licensePlate: 'CAR-003',
-      pricePerHour: 120,
-      dailyRate: 120,
-      kmRate: 1.2,
-      category: 'luxury',
-      capacity: 7,
-      locationId: location2.id
-    },
-    {
-      make: 'Mercedes',
-      model: 'C-Class',
-      year: 2022,
-      licensePlate: 'CAR-004',
-      pricePerHour: 100,
-      dailyRate: 100,
-      kmRate: 1.0,
-      category: 'luxury',
-      capacity: 5,
-      locationId: location1.id
-    },
-    {
-      make: 'Nissan',
-      model: 'Altima',
-      year: 2021,
-      licensePlate: 'CAR-005',
-      pricePerHour: 45,
-      dailyRate: 45,
-      kmRate: 0.45,
-      category: 'economy',
-      capacity: 5,
-      locationId: location2.id
-    },
-    {
-      make: 'Audi',
-      model: 'A4',
-      year: 2023,
-      licensePlate: 'CAR-006',
-      pricePerHour: 90,
-      dailyRate: 90,
-      kmRate: 0.9,
-      category: 'luxury',
-      capacity: 5,
-      locationId: location1.id
+  const location3 = await prisma.location.create({
+    data: {
+      name: 'Kandy Branch',
+      address: 'Temple Street',
+      city: 'Kandy',
+      availableCars: 8
     }
+  })
+
+  const location4 = await prisma.location.create({
+    data: {
+      name: 'Galle Fort',
+      address: 'Fort Road',
+      city: 'Galle',
+      availableCars: 6
+    }
+  })
+
+  // Create realistic car fleet
+  const cars = [
+    // Economy Cars
+    { make: 'Toyota', model: 'Vitz', year: 2023, licensePlate: 'WP-CAR-1001', pricePerHour: 35, dailyRate: 45, kmRate: 0.35, category: 'economy', capacity: 4, locationId: location1.id, isActive: true },
+    { make: 'Suzuki', model: 'Alto', year: 2022, licensePlate: 'WP-CAR-1002', pricePerHour: 30, dailyRate: 40, kmRate: 0.30, category: 'economy', capacity: 4, locationId: location1.id, isActive: true },
+    { make: 'Nissan', model: 'March', year: 2023, licensePlate: 'WP-CAR-1003', pricePerHour: 38, dailyRate: 48, kmRate: 0.38, category: 'economy', capacity: 4, locationId: location2.id, isActive: true },
+    { make: 'Honda', model: 'Fit', year: 2022, licensePlate: 'CP-CAR-2001', pricePerHour: 40, dailyRate: 50, kmRate: 0.40, category: 'economy', capacity: 5, locationId: location3.id, isActive: true },
+    { make: 'Toyota', model: 'Yaris', year: 2023, licensePlate: 'SP-CAR-3001', pricePerHour: 42, dailyRate: 52, kmRate: 0.42, category: 'economy', capacity: 5, locationId: location4.id, isActive: true },
+    
+    // Compact Cars
+    { make: 'Toyota', model: 'Axio', year: 2023, licensePlate: 'WP-CAR-1004', pricePerHour: 45, dailyRate: 58, kmRate: 0.45, category: 'compact', capacity: 5, locationId: location1.id, isActive: true },
+    { make: 'Honda', model: 'Grace', year: 2022, licensePlate: 'WP-CAR-1005', pricePerHour: 48, dailyRate: 60, kmRate: 0.48, category: 'compact', capacity: 5, locationId: location1.id, isActive: true },
+    { make: 'Nissan', model: 'Latio', year: 2023, licensePlate: 'WP-CAR-1006', pricePerHour: 46, dailyRate: 58, kmRate: 0.46, category: 'compact', capacity: 5, locationId: location2.id, isActive: true },
+    
+    // SUV Cars
+    { make: 'Toyota', model: 'Prado', year: 2023, licensePlate: 'WP-CAR-1007', pricePerHour: 85, dailyRate: 110, kmRate: 0.85, category: 'suv', capacity: 7, locationId: location1.id, isActive: true },
+    { make: 'Mitsubishi', model: 'Montero', year: 2022, licensePlate: 'CP-CAR-2002', pricePerHour: 80, dailyRate: 105, kmRate: 0.80, category: 'suv', capacity: 7, locationId: location3.id, isActive: true },
+    { make: 'Honda', model: 'Vezel', year: 2023, licensePlate: 'WP-CAR-1008', pricePerHour: 65, dailyRate: 85, kmRate: 0.65, category: 'suv', capacity: 5, locationId: location2.id, isActive: true },
+    { make: 'Nissan', model: 'X-Trail', year: 2022, licensePlate: 'SP-CAR-3002', pricePerHour: 70, dailyRate: 90, kmRate: 0.70, category: 'suv', capacity: 7, locationId: location4.id, isActive: true },
+    
+    // Luxury Cars
+    { make: 'BMW', model: '320i', year: 2023, licensePlate: 'WP-CAR-1009', pricePerHour: 120, dailyRate: 150, kmRate: 1.20, category: 'luxury', capacity: 5, locationId: location1.id, isActive: true },
+    { make: 'Mercedes', model: 'C200', year: 2023, licensePlate: 'WP-CAR-1010', pricePerHour: 125, dailyRate: 155, kmRate: 1.25, category: 'luxury', capacity: 5, locationId: location1.id, isActive: true },
+    { make: 'Audi', model: 'A4', year: 2022, licensePlate: 'CP-CAR-2003', pricePerHour: 115, dailyRate: 145, kmRate: 1.15, category: 'luxury', capacity: 5, locationId: location3.id, isActive: true },
+    { make: 'Lexus', model: 'ES300', year: 2023, licensePlate: 'WP-CAR-1011', pricePerHour: 130, dailyRate: 165, kmRate: 1.30, category: 'luxury', capacity: 5, locationId: location2.id, isActive: true },
+    
+    // Van/Minibus
+    { make: 'Toyota', model: 'Hiace', year: 2022, licensePlate: 'WP-VAN-1001', pricePerHour: 75, dailyRate: 95, kmRate: 0.75, category: 'van', capacity: 14, locationId: location1.id, isActive: true },
+    { make: 'Nissan', model: 'Caravan', year: 2023, licensePlate: 'CP-VAN-2001', pricePerHour: 70, dailyRate: 90, kmRate: 0.70, category: 'van', capacity: 12, locationId: location3.id, isActive: true },
+    { make: 'Toyota', model: 'Coaster', year: 2022, licensePlate: 'SP-BUS-3001', pricePerHour: 95, dailyRate: 120, kmRate: 0.95, category: 'van', capacity: 29, locationId: location4.id, isActive: true },
+    
+    // Some cars under maintenance
+    { make: 'Honda', model: 'Civic', year: 2021, licensePlate: 'WP-CAR-1012', pricePerHour: 55, dailyRate: 70, kmRate: 0.55, category: 'compact', capacity: 5, locationId: location1.id, isActive: false },
+    { make: 'Toyota', model: 'Camry', year: 2020, licensePlate: 'WP-CAR-1013', pricePerHour: 75, dailyRate: 95, kmRate: 0.75, category: 'luxury', capacity: 5, locationId: location2.id, isActive: false }
   ]
 
   for (const car of cars) {

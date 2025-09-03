@@ -17,11 +17,29 @@ export async function GET(request) {
       return NextResponse.json(cached)
     }
     
-    // Get all active cars first
-    const cars = await prisma.car.findMany({
-      where: {
-        isActive: true
-      },
+    // Build where clause for database filtering
+    const where = {
+      isActive: true
+    }
+    
+    if (location) {
+      where.location = {
+        city: {
+          contains: location,
+          mode: 'insensitive'
+        }
+      }
+    }
+    
+    if (category) {
+      where.category = {
+        contains: category,
+        mode: 'insensitive'
+      }
+    }
+    
+    const finalCars = await prisma.car.findMany({
+      where,
       include: {
         location: true
       },
@@ -30,26 +48,8 @@ export async function GET(request) {
       }
     })
     
-    // Filter by location if specified
-    let filteredCars = cars
-    if (location) {
-      filteredCars = cars.filter(car => 
-        car.location?.city?.toLowerCase().includes(location.toLowerCase())
-      )
-    }
-    
-    // Filter by category if specified
-    if (category) {
-      filteredCars = filteredCars.filter(car => 
-        car.category?.toLowerCase().includes(category.toLowerCase())
-      )
-    }
-    
-    // Return filtered cars or all cars if no matches
-    const finalCars = filteredCars.length > 0 ? filteredCars : cars
-    
-    console.log('🚗 Found cars:', cars.length)
-    console.log('🚗 Cars data:', cars)
+    console.log('🚗 Found cars:', finalCars.length)
+    console.log('🚗 Cars data:', finalCars)
     
     await cacheSet(cacheKey, finalCars, 300)
     

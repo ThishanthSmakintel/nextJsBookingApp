@@ -58,7 +58,11 @@ export function ToastProvider({ children }) {
                 <div className="flex gap-2">
                   <button 
                     onClick={() => {
-                      toast.onConfirm()
+                      try {
+                        toast.onConfirm()
+                      } catch (error) {
+                        console.error('Toast onConfirm error:', error)
+                      }
                       removeToast(toast.id)
                     }} 
                     className="btn btn-sm btn-error"

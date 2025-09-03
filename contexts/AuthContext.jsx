@@ -13,32 +13,28 @@ export const useAuth = () => {
 }
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    console.log('AuthContext: Initializing auth state')
-    const token = localStorage.getItem('token')
-    const userData = localStorage.getItem('user')
-    
-    console.log('AuthContext: Token exists:', !!token, 'User data exists:', !!userData)
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData)
-        console.log('AuthContext: Setting user:', parsedUser)
-        setUser(parsedUser)
-      } catch (error) {
-        console.error('AuthContext: Error parsing user data:', error)
-        clearSession()
+  const [user, setUser] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token')
+      const userData = localStorage.getItem('user')
+      if (token && userData) {
+        try {
+          return JSON.parse(userData)
+        } catch (error) {
+          clearSession()
+          return null
+        }
       }
     }
-    setIsLoading(false)
-    console.log('AuthContext: Loading set to false')
+    return null
+  })
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    // Auth state is already initialized synchronously
   }, [])
 
   const login = (userData, token) => {
-    console.log('AuthContext: Logging in user:', userData)
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(userData))
     setUser(userData)
@@ -47,7 +43,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     clearSession()
     setUser(null)
-    window.location.href = '/'
+    if (typeof window !== 'undefined') {
+      window.location.href = '/'
+    }
   }
 
   return (

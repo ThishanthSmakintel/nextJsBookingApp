@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import QuickActions from '@/components/admin/QuickActions'
 import PermissionWrapper from '@/components/PermissionWrapper'
 import { useRealTimeUpdates } from '@/hooks/useRealTimeUpdates'
@@ -8,6 +10,10 @@ import { LayoutDashboard, Users, Car, Calendar, DollarSign } from 'lucide-react'
 export default function DashboardPage() {
   const [stats, setStats] = useState({ bookings: 0, users: 0, cars: 0, revenue: 0 })
   const [recentActivity, setRecentActivity] = useState([])
+
+  const [loading, setLoading] = useState(true)
+  const { user } = useAuth()
+  const router = useRouter()
 
   useRealTimeUpdates({
     onBookingUpdate: (data) => {
@@ -19,6 +25,15 @@ export default function DashboardPage() {
     }
   })
 
+  useEffect(() => {
+    setLoading(false)
+  }, [user])
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-96"><span className="loading loading-spinner loading-lg"></span></div>
+  }
+
+  // Admin/Staff Dashboard
   return (
     <div className="space-y-6">
       <div>

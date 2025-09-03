@@ -48,14 +48,18 @@ export default function StaffPage() {
   useEffect(() => {
     if (!socket) return
 
+    let debounceTimer
     const handlePermissionUpdate = (data) => {
-      fetchRBACData()
-      if (selectedUser && data.userId === selectedUser.id) {
-        const updatedUser = users.find(u => u.id === data.userId)
-        if (updatedUser) {
-          setUserPermissions(updatedUser.permissions?.map(p => `${p.permission.resource}:${p.permission.action}`) || [])
+      clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => {
+        fetchRBACData()
+        if (selectedUser && data.userId === selectedUser.id) {
+          const updatedUser = users.find(u => u.id === data.userId)
+          if (updatedUser) {
+            setUserPermissions(updatedUser.permissions?.map(p => `${p.permission.resource}:${p.permission.action}`) || [])
+          }
         }
-      }
+      }, 300)
     }
 
     socket.on('rbac-updated', handlePermissionUpdate)

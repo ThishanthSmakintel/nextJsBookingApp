@@ -29,46 +29,30 @@ function decodeToken(token) {
 }
 
 export default function AdminLayout({ children }) {
-  const [isAuthorized, setIsAuthorized] = useState(false)
-  const [loading, setLoading] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('token')
-      
-      if (!token) {
-        router.push('/staff-login')
-        return
-      }
-
-      const decoded = decodeToken(token)
-      if (decoded && (decoded.role === 'ADMIN' || decoded.role === 'STAFF' || decoded.role === 'DRIVER') && decoded.exp > Date.now() / 1000) {
-        setIsAuthorized(true)
-      } else {
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        router.push('/staff-login')
-      }
-      
-      setLoading(false)
+    const token = localStorage.getItem('token')
+    
+    if (!token) {
+      router.push('/staff-login')
+      return
     }
 
-    checkAuth()
+    const decoded = decodeToken(token)
+    if (decoded && (decoded.role === 'CUSTOMER' || decoded.role === 'customer')) {
+      router.push('/')
+      return
+    }
+    
+    if (!decoded || !(decoded.role === 'ADMIN' || decoded.role === 'STAFF' || decoded.role === 'DRIVER') || decoded.exp <= Date.now() / 1000) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      router.push('/staff-login')
+      return
+    }
   }, [router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    )
-  }
-
-  if (!isAuthorized) {
-    return null
-  }
 
   return (
     <ThemeProvider>

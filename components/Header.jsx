@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Car, Search, LogIn, LogOut, Menu, User } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import LanguageSelector from './LanguageSelector'
@@ -8,21 +9,11 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLocale } from '@/contexts/LocaleContext'
 
 export default function Header() {
-  const { user, isLoading, logout } = useAuth()
+  const { user, logout } = useAuth()
   const { t } = useLocale()
+  const router = useRouter()
 
-  if (isLoading) {
-    return (
-      <div className="navbar bg-primary text-primary-content shadow-lg">
-        <div className="flex-1">
-          <a href="/" className="btn btn-ghost text-xl">
-            <Car className="w-6 h-6 mr-2" />
-            CarBook
-          </a>
-        </div>
-      </div>
-    )
-  }
+
 
   return (
     <div className="navbar bg-primary text-primary-content shadow-lg">
@@ -60,10 +51,14 @@ export default function Header() {
             </button>
           </>
         ) : (
-          <Link href="/login" id="login-btn" className="btn btn-ghost" prefetch={true}>
+          <button 
+            onClick={() => router.push('/login')} 
+            id="login-btn" 
+            className="btn btn-ghost"
+          >
             <LogIn className="w-4 h-4 mr-1" />
             {t('login')}
-          </Link>
+          </button>
         )}
       </div>
     </div>

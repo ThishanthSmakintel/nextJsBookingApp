@@ -57,7 +57,8 @@ const getMenuItems = (userRole) => {
     { path: '/dashboard/profile', icon: User, label: 'Profile' }
   ]
 
-  return userRole === 'DRIVER' ? driverItems : allItems
+  if (userRole === 'DRIVER') return driverItems
+  return allItems
 }
 
 function DashboardSidebar() {

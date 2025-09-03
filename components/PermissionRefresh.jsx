@@ -8,15 +8,15 @@ export default function PermissionRefresh() {
   useEffect(() => {
     if (!user) return
     
-    // Trigger permission refresh across tabs/windows
-    const triggerRefresh = () => {
-      localStorage.setItem('permissions_updated', Date.now().toString())
-    }
+    // Permission refresh is handled by storage event listener
     
     // Listen for permission updates from other tabs
     const handleStorageChange = (e) => {
       if (e.key === 'permissions_updated') {
-        window.location.reload()
+        // Instead of full page reload, navigate to current path
+        if (typeof window !== 'undefined') {
+          window.location.href = window.location.pathname
+        }
       }
     }
     

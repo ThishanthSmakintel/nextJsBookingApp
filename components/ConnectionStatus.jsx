@@ -17,10 +17,14 @@ export default function ConnectionStatus() {
       
       const pingInterval = setInterval(() => {
         if (socket.connected) {
-          const start = Date.now()
-          socket.emit('ping', start, (response) => {
-            setLastPing(Date.now() - start)
-          })
+          try {
+            const start = Date.now()
+            socket.emit('ping', start, (response) => {
+              setLastPing(Date.now() - start)
+            })
+          } catch (error) {
+            console.error('Socket ping error:', error)
+          }
         }
       }, 5000)
       

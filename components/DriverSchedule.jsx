@@ -22,7 +22,7 @@ function Toast({ message, type, onClose }) {
   )
 }
 
-export default function DriverSchedule({ driverId, isAdmin = false }) {
+export default function DriverSchedule({ driverId }) {
   const [schedules, setSchedules] = useState(DAYS.map((_, index) => ({
     dayOfWeek: index,
     startTime: '09:00',

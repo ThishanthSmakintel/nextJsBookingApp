@@ -25,7 +25,9 @@ export default function RegisterForm() {
         body: JSON.stringify(formData)
       })
 
-      const data = await res.json()
+      const data = res.headers.get('content-type')?.includes('application/json') 
+        ? await res.json() 
+        : { error: 'Invalid response format' }
 
       if (res.ok) {
         localStorage.setItem('token', data.token)

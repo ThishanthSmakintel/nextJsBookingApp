@@ -26,7 +26,7 @@ export default function LanguageSelector() {
     >
       {availableLocales.map((loc) => (
         <option key={loc} value={loc}>
-          {localeNames[loc]} {locale === loc ? '✓' : ''}
+          {localeNames[loc] || loc} {locale === loc ? '✓' : ''}
         </option>
       ))}
     </select>

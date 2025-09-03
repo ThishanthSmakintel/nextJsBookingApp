@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { driver } from 'driver.js'
-import { Lock, Mail, LogIn, AlertCircle } from 'lucide-react'
+
+import { Lock, Mail, LogIn, AlertCircle, RefreshCw, Clock } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginForm() {
@@ -10,52 +10,26 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [otpSent, setOtpSent] = useState(false)
+  const [countdown, setCountdown] = useState(0)
+  const [canResend, setCanResend] = useState(false)
   const router = useRouter()
   const { login } = useAuth()
 
   useEffect(() => {
-    if (!localStorage.getItem('login-tour')) {
-      const driverObj = driver({
-        showProgress: true,
-        showButtons: ['next', 'previous', 'close'],
-        nextBtnText: 'Next →',
-        prevBtnText: '← Previous',
-        doneBtnText: 'Start Booking!',
-        steps: [
-          { 
-            element: '#email-input', 
-            popover: { 
-              title: 'Enter Your Email', 
-              description: 'Use the email address you registered with to access your account and bookings.',
-              side: 'top'
-            } 
-          },
-          { 
-            element: '#password-input', 
-            popover: { 
-              title: 'Secure Password', 
-              description: 'Enter your password to securely access your dashboard and manage bookings.',
-              side: 'top'
-            } 
-          },
-          { 
-            element: '#login-btn', 
-            popover: { 
-              title: 'Access Dashboard', 
-              description: 'Click to login and access your personalized dashboard with booking history.',
-              side: 'top'
-            } 
+    let timer
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            setCanResend(true)
+            return 0
           }
-        ],
-        onDestroyed: () => {
-          localStorage.setItem('login-tour', 'completed')
-        }
-      })
-      setTimeout(() => {
-        driverObj.drive()
-      }, 800)
+          return prev - 1
+        })
+      }, 1000)
     }
-  }, [])
+    return () => clearInterval(timer)
+  }, [countdown])
 
   const handleSendOTP = async (e) => {
     e.preventDefault()
@@ -73,6 +47,8 @@ export default function LoginForm() {
 
       if (res.ok) {
         setOtpSent(true)
+        setCountdown(300) // 5 minutes
+        setCanResend(false)
       } else if (res.status === 404) {
         setError('User not found. Please register first.')
       } else {
@@ -101,7 +77,12 @@ export default function LoginForm() {
 
       if (res.ok) {
         login(data.user, data.token)
-        router.push('/dashboard')
+        // Customers go to customer dashboard, admin/staff/driver go to admin dashboard
+        if (data.user.role === 'CUSTOMER' || data.user.role === 'customer') {
+          router.push('/customer-dashboard')
+        } else {
+          router.push('/dashboard')
+        }
       } else {
         setError(data.error)
       }
@@ -110,6 +91,39 @@ export default function LoginForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleResendOTP = async () => {
+    setLoading(true)
+    setError('')
+    
+    try {
+      const res = await fetch('/api/auth/login-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setCountdown(300)
+        setCanResend(false)
+        setError('')
+      } else {
+        setError(data.error)
+      }
+    } catch (err) {
+      setError('Failed to resend OTP')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   return (
@@ -163,7 +177,16 @@ export default function LoginForm() {
         ) : (
           <form onSubmit={handleVerifyOTP} className="space-y-4">
             <div className="alert alert-info mb-4">
-              <span>OTP sent to {formData.email}</span>
+              <Mail className="w-5 h-5" />
+              <div>
+                <div>OTP sent to {formData.email}</div>
+                {countdown > 0 && (
+                  <div className="text-sm flex items-center mt-1">
+                    <Clock className="w-4 h-4 mr-1" />
+                    Expires in {formatTime(countdown)}
+                  </div>
+                )}
+              </div>
             </div>
             
             <div className="form-control">
@@ -176,9 +199,9 @@ export default function LoginForm() {
               <input
                 type="text"
                 placeholder="Enter 6-digit OTP"
-                className="input input-bordered input-primary"
+                className="input input-bordered input-primary text-center text-lg tracking-widest"
                 value={formData.otp}
-                onChange={(e) => setFormData({...formData, otp: e.target.value})}
+                onChange={(e) => setFormData({...formData, otp: e.target.value.replace(/\D/g, '')})}
                 maxLength={6}
                 required
               />
@@ -187,7 +210,12 @@ export default function LoginForm() {
             <div className="flex gap-2">
               <button 
                 type="button"
-                onClick={() => setOtpSent(false)}
+                onClick={() => {
+                  setOtpSent(false)
+                  setCountdown(0)
+                  setCanResend(false)
+                  setFormData({...formData, otp: ''})
+                }}
                 className="btn btn-outline flex-1"
               >
                 Back
@@ -195,11 +223,75 @@ export default function LoginForm() {
               <button 
                 type="submit" 
                 className="btn btn-primary flex-1"
-                disabled={loading}
+                disabled={loading || formData.otp.length !== 6}
               >
                 {loading && <span className="loading loading-spinner loading-sm"></span>}
                 {loading ? 'Verifying...' : 'Login'}
               </button>
+            </div>
+
+            <div className="text-center space-y-2">
+              {canResend ? (
+                <div className="flex gap-2 justify-center">
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
+                    disabled={loading}
+                    className="btn btn-ghost btn-sm"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Resend OTP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOtpSent(false)
+                      setCountdown(0)
+                      setCanResend(false)
+                      setFormData({ email: '', otp: '' })
+                      setError('')
+                    }}
+                    className="btn btn-ghost btn-sm"
+                  >
+                    Try different email
+                  </button>
+                </div>
+              ) : countdown > 0 ? (
+                <div className="space-y-1">
+                  <span className="text-sm text-base-content/60">
+                    Resend available in {formatTime(countdown)}
+                  </span>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOtpSent(false)
+                        setCountdown(0)
+                        setCanResend(false)
+                        setFormData({ email: '', otp: '' })
+                        setError('')
+                      }}
+                      className="btn btn-ghost btn-xs"
+                    >
+                      Use different email
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtpSent(false)
+                    setCountdown(0)
+                    setCanResend(false)
+                    setFormData({ email: '', otp: '' })
+                    setError('')
+                  }}
+                  className="btn btn-ghost btn-sm"
+                >
+                  Try different email
+                </button>
+              )}
             </div>
           </form>
         )}

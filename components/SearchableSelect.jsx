@@ -15,7 +15,7 @@ export default function SearchableSelect({
   const dropdownRef = useRef(null)
 
   const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(search.toLowerCase())
+    option?.label?.toLowerCase().includes(search.toLowerCase())
   )
 
   const selectedOption = options.find(opt => opt.value === value)

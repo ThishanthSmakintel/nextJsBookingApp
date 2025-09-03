@@ -31,9 +31,14 @@ export default function CreateBookingPage() {
   const convertToGoogleMapsLink = (location) => {
     if (!location) return '';
     
-    // If already a Google Maps link, return as is
-    if (location.includes('maps.google.com') || location.includes('goo.gl/maps')) {
-      return location;
+    // Validate Google Maps URLs properly
+    try {
+      const url = new URL(location);
+      if (url.hostname === 'maps.google.com' || url.hostname === 'www.google.com' || url.hostname === 'goo.gl') {
+        return location;
+      }
+    } catch (e) {
+      // Not a valid URL, treat as location name
     }
     
     // If GPS coordinates (lat,lng format)

@@ -5,6 +5,8 @@ export default function PermissionNotification() {
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
+    const timeouts = new Map()
+    
     const handlePermissionUpdate = (event) => {
       const notification = {
         id: Date.now(),
@@ -15,15 +17,20 @@ export default function PermissionNotification() {
       setNotifications(prev => [...prev, notification])
       
       // Auto remove after 5 seconds
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         setNotifications(prev => prev.filter(n => n.id !== notification.id))
+        timeouts.delete(notification.id)
       }, 5000)
+      
+      timeouts.set(notification.id, timeoutId)
     }
 
     window.addEventListener('permissions-updated', handlePermissionUpdate)
     
     return () => {
       window.removeEventListener('permissions-updated', handlePermissionUpdate)
+      timeouts.forEach(timeoutId => clearTimeout(timeoutId))
+      timeouts.clear()
     }
   }, [])
 

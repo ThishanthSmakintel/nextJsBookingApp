@@ -20,6 +20,12 @@ function AdminLoginForm() {
     setLoading(true)
     setError('')
 
+    if (!email || !password) {
+      setError('Email and password are required')
+      setLoading(false)
+      return
+    }
+    
     try {
       const response = await fetch('/api/auth/admin-login', {
         method: 'POST',

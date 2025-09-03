@@ -1,8 +1,10 @@
 'use client'
 import PermissionButton from '@/components/PermissionButton'
 import { Plus, Download } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function QuickActions() {
+  const router = useRouter()
   return (
     <div className="card bg-base-100 shadow">
       <div className="card-body">
@@ -12,7 +14,7 @@ export default function QuickActions() {
             resource="cars" 
             action="create"
             className="btn btn-primary btn-sm"
-            onClick={() => window.location.href = '/dashboard/cars'}
+            onClick={() => router.push('/dashboard/cars')}
           >
             <Plus size={16} /> Add Car
           </PermissionButton>
@@ -21,7 +23,7 @@ export default function QuickActions() {
             resource="drivers" 
             action="create"
             className="btn btn-secondary btn-sm"
-            onClick={() => window.location.href = '/dashboard/drivers'}
+            onClick={() => router.push('/dashboard/drivers')}
           >
             <Plus size={16} /> Add Driver
           </PermissionButton>
@@ -30,7 +32,7 @@ export default function QuickActions() {
             resource="staff" 
             action="create"
             className="btn btn-accent btn-sm"
-            onClick={() => window.location.href = '/dashboard/staff'}
+            onClick={() => router.push('/dashboard/staff')}
           >
             <Plus size={16} /> Add Staff
           </PermissionButton>
@@ -39,7 +41,7 @@ export default function QuickActions() {
             resource="bookings" 
             action="create"
             className="btn btn-info btn-sm"
-            onClick={() => window.location.href = '/dashboard/create-booking'}
+            onClick={() => router.push('/dashboard/create-booking')}
           >
             <Plus size={16} /> New Booking
           </PermissionButton>
@@ -48,7 +50,7 @@ export default function QuickActions() {
             resource="customers" 
             action="create"
             className="btn btn-warning btn-sm"
-            onClick={() => window.location.href = '/dashboard/customers'}
+            onClick={() => router.push('/dashboard/customers')}
           >
             <Plus size={16} /> Add Customer
           </PermissionButton>
@@ -57,7 +59,7 @@ export default function QuickActions() {
             resource="reports" 
             action="read"
             className="btn btn-outline btn-sm"
-            onClick={() => window.location.href = '/dashboard/reports'}
+            onClick={() => router.push('/dashboard/reports')}
           >
             <Download size={16} /> Reports
           </PermissionButton>

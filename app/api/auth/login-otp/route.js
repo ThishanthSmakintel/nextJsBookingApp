@@ -15,7 +15,9 @@ export async function POST(request) {
     }
     
     const otp = generateOTP()
+    console.log('Generated OTP:', otp, 'for', email)
     await storeOTP(email, otp, 300) // 5 minutes
+    console.log('OTP stored in Redis')
     const sent = await sendOTP(email, otp)
     
     if (!sent) {
